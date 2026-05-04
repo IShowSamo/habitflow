@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Habitflow – Hi-Fi Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #0e0e14; font-family: 'DM Sans', sans-serif; overflow: hidden; }
+  #root { height: 100%; display: flex; align-items: center; justify-content: center; }
+  button { font-family: inherit; cursor: pointer; border: none; }
+  input, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+// iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
+// Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
+// Exports: IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
+
+// ─────────────────────────────────────────────────────────────
+// Status bar
+// ─────────────────────────────────────────────────────────────
+function IOSStatusBar({ dark = false, time = '9:41' }) {
+  const c = dark ? '#fff' : '#000';
+  return (
+    <div style={{
+      display: 'flex', gap: 154, alignItems: 'center', justifyContent: 'center',
+      padding: '21px 24px 19px', boxSizing: 'border-box',
+      position: 'relative', zIndex: 20, width: '100%',
+    }}>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 1.5 }}>
+        <span style={{
+          fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590,
+          fontSize: 17, lineHeight: '22px', color: c,
+        }}>{time}</span>
+      </div>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 1, paddingRight: 1 }}>
+        <svg width="19" height="12" viewBox="0 0 19 12">
+          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
+          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
+          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
+          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
+        </svg>
+        <svg width="17" height="12" viewBox="0 0 17 12">
+          <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill={c}/>
+          <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill={c}/>
+          <circle cx="8.5" cy="10.5" r="1.5" fill={c}/>
+        </svg>
+        <svg width="27" height="13" viewBox="0 0 27 13">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
+          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
+          <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill={c} fillOpacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Liquid glass pill — blur + tint + shine
+// ─────────────────────────────────────────────────────────────
+function IOSGlassPill({ children, dark = false, style = {} }) {
+  return (
+    <div style={{
+      height: 44, minWidth: 44, borderRadius: 9999,
+      position: 'relative', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: dark
+        ? '0 2px 6px rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.2)'
+        : '0 1px 3px rgba(0,0,0,0.07), 0 3px 10px rgba(0,0,0,0.06)',
+      ...style,
+    }}>
+      {/* blur + tint */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.28)' : 'rgba(255,255,255,0.5)',
+      }} />
+      {/* shine */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15), inset -1px -1px 1px rgba(255,255,255,0.08)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+      }} />
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', padding: '0 4px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Navigation bar — glass pills + large title
+// ─────────────────────────────────────────────────────────────
+function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
+  const muted = dark ? 'rgba(255,255,255,0.6)' : '#404040';
+  const text = dark ? '#fff' : '#000';
+  const pillIcon = (content) => (
+    <IOSGlassPill dark={dark}>
+      <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {content}
+      </div>
+    </IOSGlassPill>
+  );
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', gap: 10,
+      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px',
+      }}>
+        {/* back chevron */}
+        {pillIcon(
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style={{ marginLeft: -1 }}>
+            <path d="M10 2L2 10l8 8" stroke={muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        {/* trailing ellipsis */}
+        {trailingIcon && pillIcon(
+          <svg width="22" height="6" viewBox="0 0 22 6">
+            <circle cx="3" cy="3" r="2.5" fill={muted}/>
+            <circle cx="11" cy="3" r="2.5" fill={muted}/>
+            <circle cx="19" cy="3" r="2.5" fill={muted}/>
+          </svg>
+        )}
+      </div>
+      {/* large title */}
+      <div style={{
+        padding: '0 16px',
+        fontFamily: '-apple-system, system-ui',
+        fontSize: 34, fontWeight: 700, lineHeight: '41px',
+        color: text, letterSpacing: 0.4,
+      }}>{title}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Grouped list (inset card, r:26) + row (52px)
+// ─────────────────────────────────────────────────────────────
+function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark = false }) {
+  const text = dark ? '#fff' : '#000';
+  const sec = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const ter = dark ? 'rgba(235,235,245,0.3)' : 'rgba(60,60,67,0.3)';
+  const sep = dark ? 'rgba(84,84,88,0.65)' : 'rgba(60,60,67,0.12)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', minHeight: 52,
+      padding: '0 16px', position: 'relative',
+      fontFamily: '-apple-system, system-ui', fontSize: 17,
+      letterSpacing: -0.43,
+    }}>
+      {icon && (
+        <div style={{
+          width: 30, height: 30, borderRadius: 7, background: icon,
+          marginRight: 12, flexShrink: 0,
+        }} />
+      )}
+      <div style={{ flex: 1, color: text }}>{title}</div>
+      {detail && <span style={{ color: sec, marginRight: 6 }}>{detail}</span>}
+      {chevron && (
+        <svg width="8" height="14" viewBox="0 0 8 14" style={{ flexShrink: 0 }}>
+          <path d="M1 1l6 6-6 6" stroke={ter} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+      {!isLast && (
+        <div style={{
+          position: 'absolute', bottom: 0, right: 0,
+          left: icon ? 58 : 16, height: 0.5, background: sep,
+        }} />
+      )}
+    </div>
+  );
+}
+
+function IOSList({ header, children, dark = false }) {
+  const hc = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const bg = dark ? '#1C1C1E' : '#fff';
+  return (
+    <div>
+      {header && (
+        <div style={{
+          fontFamily: '-apple-system, system-ui', fontSize: 13,
+          color: hc, textTransform: 'uppercase',
+          padding: '8px 36px 6px', letterSpacing: -0.08,
+        }}>{header}</div>
+      )}
+      <div style={{
+        background: bg, borderRadius: 26,
+        margin: '0 16px', overflow: 'hidden',
+      }}>{children}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Device frame
+// ─────────────────────────────────────────────────────────────
+function IOSDevice({
+  children, width = 402, height = 874, dark = false,
+  title, keyboard = false,
+}) {
+  return (
+    <div style={{
+      width, height, borderRadius: 48, overflow: 'hidden',
+      position: 'relative', background: dark ? '#000' : '#F2F2F7',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)',
+      fontFamily: '-apple-system, system-ui, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+    }}>
+      {/* dynamic island */}
+      <div style={{
+        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+        width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
+      }} />
+      {/* status bar (absolute) */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+        <IOSStatusBar dark={dark} />
+      </div>
+      {/* nav + content */}
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {title !== undefined && <IOSNavBar title={title} dark={dark} />}
+        <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+        {keyboard && <IOSKeyboard dark={dark} />}
+      </div>
+      {/* home indicator — always on top */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+        height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+        paddingBottom: 8, pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 139, height: 5, borderRadius: 100,
+          background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Keyboard — iOS 26 liquid glass
+// ─────────────────────────────────────────────────────────────
+function IOSKeyboard({ dark = false }) {
+  const glyph = dark ? 'rgba(255,255,255,0.7)' : '#595959';
+  const sugg = dark ? 'rgba(255,255,255,0.6)' : '#333';
+  const keyBg = dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.85)';
+
+  // special-key icons
+  const icons = {
+    shift: <svg width="19" height="17" viewBox="0 0 19 17"><path d="M9.5 1L1 9.5h4.5V16h8V9.5H18L9.5 1z" fill={glyph}/></svg>,
+    del: <svg width="23" height="17" viewBox="0 0 23 17"><path d="M7 1h13a2 2 0 012 2v11a2 2 0 01-2 2H7l-6-7.5L7 1z" fill="none" stroke={glyph} strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 5l7 7M17 5l-7 7" stroke={glyph} strokeWidth="1.6" strokeLinecap="round"/></svg>,
+    ret: <svg width="20" height="14" viewBox="0 0 20 14"><path d="M18 1v6H4m0 0l4-4M4 7l4 4" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  };
+
+  const key = (content, { w, flex, ret, fs = 25, k } = {}) => (
+    <div key={k} style={{
+      height: 42, borderRadius: 8.5,
+      flex: flex ? 1 : undefined, width: w, minWidth: 0,
+      background: ret ? '#08f' : keyBg,
+      boxShadow: '0 1px 0 rgba(0,0,0,0.075)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: '-apple-system, "SF Compact", system-ui',
+      fontSize: fs, fontWeight: 458, color: ret ? '#fff' : glyph,
+    }}>{content}</div>
+  );
+
+  const row = (keys, pad = 0) => (
+    <div style={{ display: 'flex', gap: 6.5, justifyContent: 'center', padding: `0 ${pad}px` }}>
+      {keys.map(l => key(l, { flex: true, k: l }))}
+    </div>
+  );
+
+  return (
+    <div style={{
+      position: 'relative', zIndex: 15, borderRadius: 27, overflow: 'hidden',
+      padding: '11px 0 2px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      boxShadow: dark
+        ? '0 -2px 20px rgba(0,0,0,0.09)'
+        : '0 -1px 6px rgba(0,0,0,0.018), 0 -3px 20px rgba(0,0,0,0.012)',
+    }}>
+      {/* liquid glass bg — same recipe as nav pills */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.14)' : 'rgba(255,255,255,0.25)',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* autocorrect bar */}
+      <div style={{
+        display: 'flex', gap: 20, alignItems: 'center',
+        padding: '8px 22px 13px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {['"The"', 'the', 'to'].map((w, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <div style={{ width: 1, height: 25, background: '#ccc', opacity: 0.3 }} />}
+            <div style={{
+              flex: 1, textAlign: 'center',
+              fontFamily: '-apple-system, system-ui', fontSize: 17,
+              color: sugg, letterSpacing: -0.43, lineHeight: '22px',
+            }}>{w}</div>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* key layout */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: 13,
+        padding: '0 6.5px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {row(['q','w','e','r','t','y','u','i','o','p'])}
+        {row(['a','s','d','f','g','h','j','k','l'], 20)}
+        <div style={{ display: 'flex', gap: 14.25, alignItems: 'center' }}>
+          {key(icons.shift, { w: 45, k: 'shift' })}
+          <div style={{ display: 'flex', gap: 6.5, flex: 1 }}>
+            {['z','x','c','v','b','n','m'].map(l => key(l, { flex: true, k: l }))}
+          </div>
+          {key(icons.del, { w: 45, k: 'del' })}
+        </div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {key('ABC', { w: 92.25, fs: 18, k: 'abc' })}
+          {key('', { flex: true, k: 'space' })}
+          {key(icons.ret, { w: 92.25, ret: true, k: 'ret' })}
+        </div>
+      </div>
+
+      {/* bottom spacer (emoji+mic area, icons omitted) */}
+      <div style={{ height: 56, width: '100%', position: 'relative' }} />
+    </div>
+  );
+}
+
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+
+  .twk-field{appearance:none;width:100%;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
+    }
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-noncommentable=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">{children}</div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+function TweakColor({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <input type="color" className="twk-swatch" value={value}
+             onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+const { useState, useEffect, useRef } = React;
+
+// ─── THEMES ──────────────────────────────────────────────────────────────────
+const THEMES = {
+  darkPremium: {
+    name: 'Dark Premium',
+    bg:        '#080810',
+    surface:   '#0f0f1a',
+    surface2:  '#161625',
+    surface3:  '#1e1e32',
+    accent:    '#7c6dfa',
+    accent2:   '#a89bfc',
+    accentGlow:'rgba(124,109,250,0.25)',
+    green:     '#34d399',
+    gold:      '#fbbf24',
+    red:       '#f87171',
+    text:      '#f0efff',
+    text2:     '#8884aa',
+    text3:     '#4a4870',
+    border:    'rgba(255,255,255,0.06)',
+    border2:   'rgba(255,255,255,0.11)',
+    cardBg:    'rgba(255,255,255,0.03)',
+    navBg:     'rgba(10,10,20,0.92)',
+    glass:     'rgba(255,255,255,0.04)',
+  },
+  lightMinimal: {
+    name: 'Light Minimal',
+    bg:        '#f7f6f2',
+    surface:   '#ffffff',
+    surface2:  '#f0eeea',
+    surface3:  '#e8e5df',
+    accent:    '#5b4cf5',
+    accent2:   '#7b70f7',
+    accentGlow:'rgba(91,76,245,0.15)',
+    green:     '#16a34a',
+    gold:      '#d97706',
+    red:       '#dc2626',
+    text:      '#1a1830',
+    text2:     '#6b6880',
+    text3:     '#b0aec0',
+    border:    'rgba(0,0,0,0.07)',
+    border2:   'rgba(0,0,0,0.12)',
+    cardBg:    '#ffffff',
+    navBg:     'rgba(247,246,242,0.95)',
+    glass:     'rgba(0,0,0,0.03)',
+  },
+  vibrantDark: {
+    name: 'Vibrant Dark',
+    bg:        '#06060f',
+    surface:   '#0c0c1a',
+    surface2:  '#131328',
+    surface3:  '#1a1a35',
+    accent:    '#00d4ff',
+    accent2:   '#60e8ff',
+    accentGlow:'rgba(0,212,255,0.2)',
+    green:     '#00f5a0',
+    gold:      '#ffcc00',
+    red:       '#ff4d6d',
+    text:      '#e8f4ff',
+    text2:     '#7090aa',
+    text3:     '#3a5060',
+    border:    'rgba(0,212,255,0.08)',
+    border2:   'rgba(0,212,255,0.15)',
+    cardBg:    'rgba(0,212,255,0.03)',
+    navBg:     'rgba(6,6,15,0.95)',
+    glass:     'rgba(0,212,255,0.04)',
+  }
+};
+
+// ─── MOCK DATA ────────────────────────────────────────────────────────────────
+const HABITS = [
+  { id:1, name:'5 Uhr aufstehen', icon:'🌅', color:'#f59e0b', streak:14, done:true },
+  { id:2, name:'Gym',             icon:'💪', color:'#ef4444', streak:7,  done:true },
+  { id:3, name:'Lesen / Lernen',  icon:'📚', color:'#3b82f6', streak:21, done:false },
+  { id:4, name:'Kalte Dusche',    icon:'🚿', color:'#06b6d4', streak:5,  done:true },
+  { id:5, name:'Kein Alkohol',    icon:'🍺', color:'#22c55e', streak:30, done:false },
+  { id:6, name:'Social Media Detox', icon:'📵', color:'#f97316', streak:3, done:true },
+];
+
+const WEEK_DATA = [
+  { label:'Mo', pct:0.83 }, { label:'Di', pct:1.0 },
+  { label:'Mi', pct:0.67 }, { label:'Do', pct:1.0 },
+  { label:'Fr', pct:0.83 }, { label:'Sa', pct:0.5 },
+  { label:'So', pct:0.67 },
+];
+
+const FRIENDS = [
+  { id:1, name:'Max Müller',    username:'maxm',    streak:22, pct:0.83, level:12, initials:'MM', hue:220 },
+  { id:2, name:'Sara K.',       username:'sarak',   streak:15, pct:0.67, level:8,  initials:'SK', hue:340 },
+  { id:3, name:'Jonas B.',      username:'jonasb',  streak:30, pct:1.0,  level:18, initials:'JB', hue:160 },
+  { id:4, name:'Lena Winter',   username:'lenaw',   streak:9,  pct:0.5,  level:5,  initials:'LW', hue:40  },
+];
+
+// Level system
+function getLevel(streak) {
+  if (streak < 7)  return { lvl: 1, title: 'Beginner',   next: 7,  icon: '🌱' };
+  if (streak < 21) return { lvl: 2, title: 'Consistent', next: 21, icon: '🔥' };
+  if (streak < 50) return { lvl: 3, title: 'Warrior',    next: 50, icon: '⚔️' };
+  if (streak < 100)return { lvl: 4, title: 'Champion',   next: 100,icon: '🏆' };
+  return              { lvl: 5, title: 'Legend',     next: null,icon: '👑' };
+}
+
+// ─── MINI CHART ───────────────────────────────────────────────────────────────
+function MiniBarChart({ data, accent, surface3 }) {
+  const max = Math.max(...data.map(d => d.pct));
+  return (
+    <div style={{ display:'flex', gap:4, alignItems:'flex-end', height:56 }}>
+      {data.map((d, i) => (
+        <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+          <div style={{
+            width:'100%', borderRadius:4,
+            height: d.pct > 0 ? `${Math.round(d.pct/1*100)}%` : '4px',
+            minHeight: 4,
+            background: d.pct >= 0.999
+              ? `linear-gradient(180deg, ${accent}, ${accent}aa)`
+              : d.pct > 0.5
+                ? `${accent}66`
+                : surface3,
+            transition:'height 0.4s ease',
+          }} />
+          <span style={{ fontSize:9, color:'#6b6880', fontWeight:500 }}>{d.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── NAV BAR ─────────────────────────────────────────────────────────────────
+function NavBar({ page, setPage, t }) {
+  const items = [
+    { id:'today',   label:'Today',     icon: <SunIcon /> },
+    { id:'stats',   label:'Stats',     icon: <ChartIcon /> },
+    { id:'social',  label:'Community', icon: <PeopleIcon /> },
+    { id:'habits',  label:'Habits',    icon: <StarIcon /> },
+  ];
+  return (
+    <div style={{
+      position:'absolute', bottom:0, left:0, right:0,
+      background: t.navBg,
+      backdropFilter:'blur(20px)',
+      borderTop:`1px solid ${t.border}`,
+      display:'flex', paddingBottom:20, paddingTop:10,
+      zIndex:100,
+    }}>
+      {items.map(item => {
+        const active = page === item.id;
+        return (
+          <button key={item.id} onClick={() => setPage(item.id)}
+            style={{
+              flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+              background:'none', padding:'4px 0',
+              color: active ? t.accent : t.text3,
+              transition:'color 0.2s',
+            }}>
+            <div style={{ width:24, height:24, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              {React.cloneElement(item.icon, { color: active ? t.accent : t.text3 })}
+            </div>
+            <span style={{ fontSize:10, fontWeight: active ? 600 : 400, letterSpacing:'0.02em' }}>
+              {item.label}
+            </span>
+            {active && (
+              <div style={{
+                width:16, height:2, borderRadius:99,
+                background: t.accent,
+                position:'absolute', bottom:8,
+              }} />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── TODAY PAGE ───────────────────────────────────────────────────────────────
+function TodayPage({ t, habits, setHabits, setPage }) {
+  const done  = habits.filter(h => h.done).length;
+  const total = habits.length;
+  const pct   = total ? done / total : 0;
+  const R = 42, circ = 2 * Math.PI * R;
+  const dash = circ * pct;
+  const bestStreak = Math.max(...habits.map(h => h.streak));
+  const level = getLevel(bestStreak);
+
+  const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  const today = new Date();
+  const todayIdx = (today.getDay() + 6) % 7;
+
+  const toggleHabit = (id) => {
+    setHabits(prev => prev.map(h => h.id === id ? {...h, done: !h.done} : h));
+  };
+
+  return (
+    <div style={{ height:'100%', overflowY:'auto', background: t.bg }}>
+      {/* Header */}
+      <div style={{ padding:'16px 20px 8px', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+        <div>
+          <p style={{ fontSize:13, color:t.text2, fontWeight:500, marginBottom:2 }}>
+            {today.toLocaleDateString('de-DE', { weekday:'long', day:'numeric', month:'long' })}
+          </p>
+          <h1 style={{ fontSize:26, fontWeight:700, color:t.text, letterSpacing:'-0.5px', lineHeight:1.1 }}>
+            Good morning 👋
+          </h1>
+        </div>
+        <button onClick={() => setPage('settings')} style={{
+          width:38, height:38, borderRadius:'50%',
+          background:`linear-gradient(135deg, ${t.accent}, ${t.accent2})`,
+          color:'white', fontSize:14, fontWeight:700,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          boxShadow:`0 4px 12px ${t.accentGlow}`,
+        }}>S</button>
+      </div>
+
+      {/* Level / XP strip */}
+      <div style={{ margin:'8px 16px', padding:'12px 16px', borderRadius:14,
+        background: t.surface, border:`1px solid ${t.border}`,
+        display:'flex', alignItems:'center', gap:12 }}>
+        <div style={{ fontSize:24 }}>{level.icon}</div>
+        <div style={{ flex:1 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
+            <span style={{ fontSize:12, fontWeight:600, color:t.accent }}>Lvl {level.lvl} · {level.title}</span>
+            <span style={{ fontSize:11, color:t.text2 }}>
+              {level.next ? `${bestStreak} / ${level.next} Tage` : 'MAX LEVEL'}
+            </span>
+          </div>
+          <div style={{ height:4, background:t.surface3, borderRadius:99, overflow:'hidden' }}>
+            <div style={{
+              height:'100%', borderRadius:99,
+              background:`linear-gradient(90deg, ${t.accent}, ${t.accent2})`,
+              width: level.next ? `${Math.min(100,(bestStreak/level.next)*100)}%` : '100%',
+              transition:'width 0.5s ease',
+            }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Progress ring card */}
+      <div style={{ margin:'10px 16px', padding:'18px', borderRadius:16,
+        background: t.surface, border:`1px solid ${t.border}`,
+        display:'flex', alignItems:'center', gap:18 }}>
+        <svg width={100} height={100} viewBox="0 0 100 100" style={{ transform:'rotate(-90deg)', flexShrink:0 }}>
+          <defs>
+            <linearGradient id={`rg-${t.accent}`} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor={t.accent} />
+              <stop offset="100%" stopColor={t.green} />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r={R} fill="none" stroke={t.surface3} strokeWidth="7" />
+          <circle cx="50" cy="50" r={R} fill="none"
+            stroke={`url(#rg-${t.accent})`} strokeWidth="7"
+            strokeDasharray={`${dash.toFixed(1)} ${circ.toFixed(1)}`}
+            strokeLinecap="round"
+            style={{ transition:'stroke-dasharray 0.5s ease', filter:`drop-shadow(0 0 6px ${t.accentGlow})` }} />
+        </svg>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:38, fontWeight:800, color:t.text, letterSpacing:'-1.5px', lineHeight:1 }}>
+            {Math.round(pct * 100)}%
+          </div>
+          <div style={{ fontSize:13, color:t.text2, marginTop:3 }}>{done} von {total} Habits</div>
+          <div style={{ fontSize:12, fontWeight:600, color: done===total&&total>0 ? t.green : t.gold, marginTop:6 }}>
+            {done===total && total>0 ? '🔥 Perfekter Tag!' : done===0 ? "Los geht's!" : '💪 Weiter so!'}
+          </div>
+          {/* Mini bar chart */}
+          <div style={{ marginTop:12 }}>
+            <MiniBarChart data={WEEK_DATA} accent={t.accent} surface3={t.surface3} />
+          </div>
+        </div>
+      </div>
+
+      {/* Day chips */}
+      <div style={{ display:'flex', gap:5, padding:'4px 16px 10px', overflowX:'auto' }}>
+        {days.map((d, i) => {
+          const isToday = i === todayIdx;
+          return (
+            <div key={d} style={{
+              minWidth:38, padding:'6px 0', borderRadius:10, textAlign:'center', flexShrink:0,
+              background: isToday ? t.accent : t.surface,
+              border:`1px solid ${isToday ? t.accent : t.border}`,
+              cursor:'default',
+            }}>
+              <div style={{ fontSize:9, fontWeight:500, color: isToday ? 'rgba(255,255,255,0.8)' : t.text3 }}>{d}</div>
+              <div style={{ fontSize:13, fontWeight:700, color: isToday ? 'white' : t.text }}>{today.getDate() - (todayIdx - i)}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Habit list */}
+      <div style={{ padding:'0 16px 100px', display:'flex', flexDirection:'column', gap:8 }}>
+        <div style={{ fontSize:12, fontWeight:600, color:t.text3, marginBottom:2, letterSpacing:'0.06em', textTransform:'uppercase' }}>
+          Habits für heute
+        </div>
+        {habits.map(h => (
+          <HabitCard key={h.id} habit={h} t={t} onToggle={() => toggleHabit(h.id)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HabitCard({ habit, t, onToggle }) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <button onClick={onToggle}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onMouseLeave={() => setPressed(false)}
+      style={{
+        display:'flex', alignItems:'center', gap:14,
+        background: habit.done
+          ? `linear-gradient(135deg, ${habit.color}10, ${habit.color}06)`
+          : t.surface,
+        border:`1px solid ${habit.done ? habit.color + '40' : t.border}`,
+        borderRadius:14, padding:'13px 14px',
+        cursor:'pointer', width:'100%', textAlign:'left',
+        transform: pressed ? 'scale(0.97)' : 'scale(1)',
+        transition:'all 0.2s cubic-bezier(.34,1.56,.64,1)',
+        boxShadow: habit.done ? `0 2px 12px ${habit.color}15` : 'none',
+      }}>
+      <div style={{
+        width:44, height:44, borderRadius:12, flexShrink:0,
+        background:`${habit.color}18`,
+        display:'flex', alignItems:'center', justifyContent:'center', fontSize:22,
+        border:`1px solid ${habit.color}25`,
+      }}>{habit.icon}</div>
+      <div style={{ flex:1 }}>
+        <div style={{
+          fontSize:15, fontWeight:500, color: habit.done ? t.text : t.text,
+          textDecoration: habit.done ? 'line-through' : 'none',
+          textDecorationColor: t.text3,
+        }}>{habit.name}</div>
+        <div style={{ fontSize:11, color:t.text2, marginTop:2, display:'flex', alignItems:'center', gap:4 }}>
+          {habit.streak > 0 && <><span style={{ color:t.gold }}>🔥</span><span>{habit.streak} Tage Streak</span></>}
+        </div>
+      </div>
+      <div style={{
+        width:28, height:28, borderRadius:'50%', flexShrink:0,
+        background: habit.done ? t.green : 'none',
+        border:`2px solid ${habit.done ? t.green : t.border2}`,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        transition:'all 0.25s',
+        boxShadow: habit.done ? `0 0 10px ${t.green}50` : 'none',
+      }}>
+        {habit.done && <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M2 6.5l3.5 3.5 5.5-6" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>}
+      </div>
+    </button>
+  );
+}
+
+// ─── STATS PAGE ───────────────────────────────────────────────────────────────
+function StatsPage({ t, habits }) {
+  const bestStreak = Math.max(...habits.map(h => h.streak));
+  const total = habits.length;
+  const donePct = Math.round((habits.filter(h=>h.done).length / total) * 100);
+  const stats = [
+    { val:`🔥 ${bestStreak}`, label:'Best Streak', sub:'Tage in Folge', color:t.gold },
+    { val:'5/7',              label:'Perfect Days', sub:'Diese Woche',   color:t.accent },
+    { val:'142',              label:'Total Checks', sub:'Insgesamt',     color:t.accent2 },
+    { val:`${donePct}%`,      label:'Today',        sub:'Abschlussrate', color:t.green },
+  ];
+
+  const monthData = HABITS.map((h, i) => ({ ...h, monthPct: [0.82,0.64,0.91,0.73,0.55,0.88][i] }));
+
+  return (
+    <div style={{ height:'100%', overflowY:'auto', background:t.bg }}>
+      <div style={{ padding:'16px 20px 8px' }}>
+        <p style={{ fontSize:13, color:t.text2, fontWeight:500 }}>Mai 2026</p>
+        <h1 style={{ fontSize:26, fontWeight:700, color:t.text, letterSpacing:'-0.5px' }}>Statistics</h1>
+      </div>
+
+      {/* Stat cards grid */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, padding:'8px 16px' }}>
+        {stats.map((s, i) => (
+          <div key={i} style={{
+            background:t.surface, border:`1px solid ${t.border}`,
+            borderRadius:14, padding:'16px 14px',
+          }}>
+            <div style={{ fontSize:26, fontWeight:800, color:s.color, letterSpacing:'-0.5px' }}>{s.val}</div>
+            <div style={{ fontSize:13, fontWeight:600, color:t.text, marginTop:3 }}>{s.label}</div>
+            <div style={{ fontSize:11, color:t.text2, marginTop:1 }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Weekly bar */}
+      <div style={{ margin:'10px 16px', padding:'18px', background:t.surface, border:`1px solid ${t.border}`, borderRadius:16 }}>
+        <div style={{ fontSize:13, fontWeight:600, color:t.text, marginBottom:14 }}>7-Tage Verlauf</div>
+        <div style={{ display:'flex', gap:6, alignItems:'flex-end', height:80 }}>
+          {WEEK_DATA.map((d, i) => (
+            <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
+              <div style={{ fontSize:10, color:t.text2, fontWeight:600 }}>
+                {d.pct >= 0.999 ? '✓' : `${Math.round(d.pct*100)}%`}
+              </div>
+              <div style={{
+                width:'100%', borderRadius:'4px 4px 0 0',
+                height: `${Math.round(d.pct * 70)}px`,
+                background: d.pct >= 0.999
+                  ? `linear-gradient(180deg, ${t.accent}, ${t.accent}cc)`
+                  : `${t.accent}44`,
+                boxShadow: d.pct >= 0.999 ? `0 -4px 12px ${t.accentGlow}` : 'none',
+                transition:'height 0.4s ease',
+              }} />
+              <div style={{ fontSize:10, color:t.text3 }}>{d.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Habit success rate */}
+      <div style={{ margin:'10px 16px 100px', padding:'18px', background:t.surface, border:`1px solid ${t.border}`, borderRadius:16 }}>
+        <div style={{ fontSize:13, fontWeight:600, color:t.text, marginBottom:14 }}>Erfolgsquote – Mai</div>
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          {monthData.map((h, i) => (
+            <div key={h.id} style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <div style={{ width:28, textAlign:'center', fontSize:16 }}>{h.icon}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:12, fontWeight:500, color:t.text, marginBottom:4 }}>{h.name}</div>
+                <div style={{ height:5, background:t.surface3, borderRadius:99, overflow:'hidden' }}>
+                  <div style={{
+                    height:'100%', borderRadius:99,
+                    width:`${Math.round(h.monthPct*100)}%`,
+                    background: h.color,
+                    transition:'width 0.5s ease',
+                  }} />
+                </div>
+              </div>
+              <div style={{ fontSize:12, fontWeight:600, color:t.text2, minWidth:32, textAlign:'right' }}>
+                {Math.round(h.monthPct*100)}%
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── COMMUNITY PAGE ───────────────────────────────────────────────────────────
+const ALL_USERS = [
+  { id:1, name:'Max Müller',    username:'maxm',    streak:22, pct:0.83, level:12, initials:'MM', hue:220 },
+  { id:2, name:'Sara K.',       username:'sarak',   streak:15, pct:0.67, level:8,  initials:'SK', hue:340 },
+  { id:3, name:'Jonas B.',      username:'jonasb',  streak:30, pct:1.0,  level:18, initials:'JB', hue:160 },
+  { id:4, name:'Lena Winter',   username:'lenaw',   streak:9,  pct:0.5,  level:5,  initials:'LW', hue:40  },
+  { id:5, name:'Tom S.',        username:'toms',    streak:4,  pct:0.33, level:2,  initials:'TS', hue:200 },
+  { id:6, name:'Nina R.',       username:'ninar',   streak:18, pct:0.8,  level:10, initials:'NR', hue:280 },
+];
+
+function SocialPage({ t, friendships, setFriendships, setViewProfile }) {
+  const [tab, setTab] = useState('Friends');
+  const [query, setQuery] = useState('');
+  const [searchFocus, setSearchFocus] = useState(false);
+  const tabs = ['Friends', 'Leaderboard', 'Suchen'];
+
+  const friends = ALL_USERS.filter(u => friendships[u.username] === 'friends');
+  const pending = ALL_USERS.filter(u => friendships[u.username] === 'pending');
+
+  // Incoming requests (mock: Jonas sent us one)
+  const incomingRequests = friendships['__incoming'] || [];
+
+  const acceptRequest = (username) => {
+    setFriendships(prev => {
+      const next = { ...prev };
+      const inc = (next['__incoming'] || []).filter(u => u !== username);
+      next['__incoming'] = inc;
+      next[username] = 'friends';
+      return next;
+    });
+  };
+  const declineRequest = (username) => {
+    setFriendships(prev => {
+      const next = { ...prev };
+      next['__incoming'] = (next['__incoming'] || []).filter(u => u !== username);
+      return next;
+    });
+  };
+
+  const sendRequest = (username) => {
+    setFriendships(prev => ({ ...prev, [username]: 'pending' }));
+  };
+  const removeFriend = (username) => {
+    setFriendships(prev => ({ ...prev, [username]: 'none' }));
+  };
+
+  const filteredSearch = query.length >= 2
+    ? ALL_USERS.filter(u =>
+        u.username.toLowerCase().includes(query.toLowerCase()) ||
+        u.name.toLowerCase().includes(query.toLowerCase())
+      )
+    : [];
+
+  return (
+    <div style={{ height:'100%', overflowY:'auto', background:t.bg }}>
+      <div style={{ padding:'16px 20px 12px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <h1 style={{ fontSize:26, fontWeight:700, color:t.text, letterSpacing:'-0.5px' }}>Community</h1>
+        {incomingRequests.length > 0 && (
+          <div style={{
+            minWidth:22, height:22, borderRadius:11,
+            background:t.red, color:'white',
+            fontSize:12, fontWeight:700,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            padding:'0 6px',
+          }}>{incomingRequests.length}</div>
+        )}
+      </div>
+
+      {/* Incoming friend requests */}
+      {incomingRequests.length > 0 && (
+        <div style={{ margin:'0 16px 12px', padding:'14px', background:t.surface, border:`1px solid ${t.border2}`, borderRadius:14 }}>
+          <div style={{ fontSize:11, fontWeight:700, color:t.accent, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:10 }}>
+            Freundschaftsanfragen
+          </div>
+          {incomingRequests.map(uname => {
+            const u = ALL_USERS.find(x => x.username === uname);
+            if (!u) return null;
+            return (
+              <div key={uname} style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <div style={{
+                  width:38, height:38, borderRadius:'50%', flexShrink:0,
+                  background:`hsl(${u.hue},55%,38%)`,
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  fontSize:13, fontWeight:700, color:'white',
+                }}>{u.initials}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:14, fontWeight:600, color:t.text }}>{u.name}</div>
+                  <div style={{ fontSize:11, color:t.text2 }}>@{u.username}</div>
+                </div>
+                <div style={{ display:'flex', gap:6 }}>
+                  <button onClick={() => acceptRequest(uname)} style={{
+                    width:34, height:34, borderRadius:10,
+                    background:`${t.green}20`, border:`1px solid ${t.green}50`,
+                    color:t.green, fontSize:16, display:'flex', alignItems:'center', justifyContent:'center',
+                  }}>✓</button>
+                  <button onClick={() => declineRequest(uname)} style={{
+                    width:34, height:34, borderRadius:10,
+                    background:`${t.red}15`, border:`1px solid ${t.red}30`,
+                    color:t.red, fontSize:14, display:'flex', alignItems:'center', justifyContent:'center',
+                  }}>✕</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div style={{ display:'flex', gap:6, padding:'0 16px 14px' }}>
+        {tabs.map(tb => (
+          <button key={tb} onClick={() => setTab(tb)} style={{
+            padding:'7px 14px', borderRadius:20,
+            background: tab===tb ? t.accent : t.surface,
+            border:`1px solid ${tab===tb ? t.accent : t.border}`,
+            color: tab===tb ? 'white' : t.text2,
+            fontSize:12, fontWeight:600,
+            transition:'all 0.2s',
+          }}>{tb}</button>
+        ))}
+      </div>
+
+      {/* Friends tab */}
+      {tab === 'Friends' && (
+        <div style={{ padding:'0 16px 100px', display:'flex', flexDirection:'column', gap:8 }}>
+          {pending.length > 0 && (
+            <>
+              <div style={{ fontSize:11, fontWeight:600, color:t.text3, letterSpacing:'0.06em', textTransform:'uppercase' }}>
+                Ausstehend ({pending.length})
+              </div>
+              {pending.map(f => (
+                <FriendCard key={f.id} friend={f} t={t} rank={null}
+                  status="pending" onView={() => setViewProfile(f.username)} />
+              ))}
+            </>
+          )}
+          {friends.length > 0 && (
+            <>
+              <div style={{ fontSize:11, fontWeight:600, color:t.text3, letterSpacing:'0.06em', textTransform:'uppercase', marginTop: pending.length>0 ? 6 : 0 }}>
+                Freunde ({friends.length})
+              </div>
+              {friends.map(f => (
+                <FriendCard key={f.id} friend={f} t={t} rank={null}
+                  status="friends" onView={() => setViewProfile(f.username)}
+                  onRemove={() => removeFriend(f.username)} />
+              ))}
+            </>
+          )}
+          {friends.length === 0 && pending.length === 0 && (
+            <div style={{
+              padding:'40px 20px', textAlign:'center',
+              color:t.text2, fontSize:14,
+            }}>
+              <div style={{ fontSize:40, marginBottom:12 }}>👥</div>
+              <div style={{ fontWeight:600, color:t.text, marginBottom:6 }}>Noch keine Freunde</div>
+              <div style={{ fontSize:13 }}>Suche nach Usernamen im "Suchen" Tab und schicke eine Freundschaftsanfrage!</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Leaderboard tab */}
+      {tab === 'Leaderboard' && (
+        <div style={{ padding:'0 16px 100px', display:'flex', flexDirection:'column', gap:8 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', padding:'2px 4px', marginBottom:2 }}>
+            <span style={{ fontSize:11, color:t.text3, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em' }}>Spieler</span>
+            <div style={{ display:'flex', gap:20 }}>
+              <span style={{ fontSize:11, color:t.text3, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em' }}>Heute</span>
+              <span style={{ fontSize:11, color:t.text3, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em' }}>Lvl</span>
+            </div>
+          </div>
+          {[...ALL_USERS].sort((a,b) => b.streak - a.streak).map((f, i) => (
+            <FriendCard key={f.id} friend={f} t={t} rank={i+1}
+              onView={() => setViewProfile(f.username)} />
+          ))}
+        </div>
+      )}
+
+      {/* Search tab */}
+      {tab === 'Suchen' && (
+        <div style={{ padding:'0 16px 100px' }}>
+          <div style={{
+            display:'flex', alignItems:'center', gap:10,
+            background:t.surface, border:`1px solid ${searchFocus ? t.accent : t.border2}`,
+            borderRadius:12, padding:'10px 14px', marginBottom:14,
+            transition:'border-color 0.2s',
+          }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="7" cy="7" r="5" stroke={t.text3} strokeWidth="1.5"/>
+              <path d="M11 11l3 3" stroke={t.text3} strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onFocus={() => setSearchFocus(true)}
+              onBlur={() => setSearchFocus(false)}
+              placeholder="Username oder Name suchen..."
+              style={{
+                flex:1, background:'none', border:'none', outline:'none',
+                color:t.text, fontSize:14,
+              }}
+            />
+            {query && (
+              <button onClick={() => setQuery('')} style={{ background:'none', color:t.text3, fontSize:16 }}>×</button>
+            )}
+          </div>
+
+          {query.length < 2 && (
+            <div style={{ textAlign:'center', padding:'30px 0', color:t.text2, fontSize:13 }}>
+              Mindestens 2 Zeichen eingeben
+            </div>
+          )}
+
+          {query.length >= 2 && filteredSearch.length === 0 && (
+            <div style={{ textAlign:'center', padding:'30px 0', color:t.text2, fontSize:13 }}>
+              Kein User gefunden für „{query}"
+            </div>
+          )}
+
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {filteredSearch.map(u => {
+              const fs = friendships[u.username] || 'none';
+              return (
+                <div key={u.id} style={{
+                  display:'flex', alignItems:'center', gap:12,
+                  background:t.surface, border:`1px solid ${t.border}`,
+                  borderRadius:14, padding:'12px 14px',
+                }}>
+                  <div style={{
+                    width:42, height:42, borderRadius:'50%', flexShrink:0,
+                    background:`hsl(${u.hue},55%,38%)`,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    fontSize:14, fontWeight:700, color:'white',
+                    cursor:'pointer',
+                  }} onClick={() => setViewProfile(u.username)}>{u.initials}</div>
+                  <div style={{ flex:1, cursor:'pointer' }} onClick={() => setViewProfile(u.username)}>
+                    <div style={{ fontSize:14, fontWeight:600, color:t.text }}>{u.name}</div>
+                    <div style={{ fontSize:11, color:t.text2, marginTop:1 }}>@{u.username}</div>
+                  </div>
+                  {fs === 'none' && (
+                    <button onClick={() => sendRequest(u.username)} style={{
+                      padding:'7px 14px', borderRadius:10,
+                      background:t.accent, color:'white',
+                      fontSize:12, fontWeight:600,
+                      boxShadow:`0 3px 10px ${t.accentGlow}`,
+                    }}>+ Adden</button>
+                  )}
+                  {fs === 'pending' && (
+                    <div style={{
+                      padding:'7px 12px', borderRadius:10,
+                      background:t.surface2, border:`1px solid ${t.border2}`,
+                      color:t.text2, fontSize:12, fontWeight:500,
+                    }}>⏳ Gesendet</div>
+                  )}
+                  {fs === 'friends' && (
+                    <div style={{
+                      padding:'7px 12px', borderRadius:10,
+                      background:`${t.green}15`, border:`1px solid ${t.green}40`,
+                      color:t.green, fontSize:12, fontWeight:600,
+                    }}>✓ Freund</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FriendCard({ friend, t, rank, status, onView, onRemove }) {
+  const level = getLevel(friend.streak);
+  const rankIcons = ['🥇','🥈','🥉'];
+  return (
+    <div style={{
+      display:'flex', alignItems:'center', gap:12,
+      background: status==='pending' ? `${t.gold}08` : t.surface,
+      border:`1px solid ${status==='pending' ? t.gold+'30' : t.border}`,
+      borderRadius:14, padding:'12px 14px',
+      cursor: onView ? 'pointer' : 'default',
+    }} onClick={onView}>
+      {rank !== null && rank !== undefined && (
+        <div style={{ width:28, textAlign:'center', fontSize:rank<=3?18:13, color:rank<=3?'':t.text3, fontWeight:700, flexShrink:0 }}>
+          {rank <= 3 ? rankIcons[rank-1] : `#${rank}`}
+        </div>
+      )}
+      <div style={{
+        width:40, height:40, borderRadius:'50%', flexShrink:0,
+        background:`hsl(${friend.hue},55%,38%)`,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        fontSize:13, fontWeight:700, color:'white',
+      }}>{friend.initials}</div>
+      <div style={{ flex:1 }}>
+        <div style={{ fontSize:14, fontWeight:600, color:t.text }}>{friend.name}</div>
+        <div style={{ fontSize:11, color:t.text2, marginTop:1 }}>
+          {status === 'pending'
+            ? <span style={{ color:t.gold }}>⏳ Anfrage ausstehend</span>
+            : <>{level.icon} {level.title} · 🔥 {friend.streak} Tage</>
+          }
+        </div>
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:3 }}>
+        {status !== 'pending' && (
+          <>
+            <div style={{ fontSize:12, fontWeight:700, color:friend.pct>=1?t.green:t.text2 }}>
+              {Math.round(friend.pct*100)}%
+            </div>
+            <div style={{ fontSize:10, color:t.text3 }}>Lvl {level.lvl}</div>
+          </>
+        )}
+        {status === 'friends' && onRemove && (
+          <button onClick={e => { e.stopPropagation(); onRemove(); }} style={{
+            marginTop:2, padding:'3px 8px', borderRadius:6,
+            background:`${t.red}12`, border:`1px solid ${t.red}25`,
+            color:t.red, fontSize:10, fontWeight:500,
+          }}>Entfernen</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── HABITS PAGE ──────────────────────────────────────────────────────────────
+function HabitsPage({ t, habits, setHabits }) {
+  const [showForm, setShowForm] = useState(false);
+  const [newName, setNewName] = useState('');
+  const ICONS = ['⭐','🏃','🧠','💊','🥗','😴','🧘','✍️','🎯','🚴','📖','🎵','💻','🌱','🚿','💸'];
+  const COLORS = ['#7c6dfa','#22c55e','#f59e0b','#ef4444','#06b6d4','#f97316','#8b5cf6','#ec4899'];
+  const [selIcon, setSelIcon] = useState('⭐');
+  const [selColor, setSelColor] = useState('#7c6dfa');
+
+  const addHabit = () => {
+    if (!newName.trim()) return;
+    setHabits(prev => [...prev, {
+      id: Date.now(), name: newName.trim(), icon: selIcon,
+      color: selColor, streak: 0, done: false,
+    }]);
+    setNewName(''); setShowForm(false);
+  };
+
+  const archiveHabit = (id) => setHabits(prev => prev.filter(h => h.id !== id));
+
+  return (
+    <div style={{ height:'100%', overflowY:'auto', background:t.bg }}>
+      <div style={{ padding:'16px 20px 12px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <h1 style={{ fontSize:26, fontWeight:700, color:t.text, letterSpacing:'-0.5px' }}>My Habits</h1>
+        <button onClick={() => setShowForm(v => !v)} style={{
+          width:36, height:36, borderRadius:10,
+          background: showForm ? t.surface3 : t.accent,
+          color:'white', fontSize:20, fontWeight:300,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          boxShadow: showForm ? 'none' : `0 4px 12px ${t.accentGlow}`,
+        }}>{showForm ? '×' : '+'}</button>
+      </div>
+
+      {showForm && (
+        <div style={{ margin:'0 16px 12px', padding:'16px', background:t.surface, border:`1px solid ${t.border2}`, borderRadius:16 }}>
+          <input value={newName} onChange={e => setNewName(e.target.value)}
+            placeholder="Habit Name..."
+            style={{
+              width:'100%', padding:'10px 14px', borderRadius:10,
+              background:t.surface2, border:`1px solid ${t.border2}`,
+              color:t.text, fontSize:14, marginBottom:12, outline:'none',
+            }} />
+          <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:12 }}>
+            {ICONS.map(ic => (
+              <button key={ic} onClick={() => setSelIcon(ic)} style={{
+                width:36, height:36, borderRadius:8, fontSize:18,
+                background: selIcon===ic ? t.accent+'33' : t.surface2,
+                border:`1px solid ${selIcon===ic ? t.accent : t.border}`,
+              }}>{ic}</button>
+            ))}
+          </div>
+          <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
+            {COLORS.map(c => (
+              <button key={c} onClick={() => setSelColor(c)} style={{
+                width:28, height:28, borderRadius:'50%', background:c,
+                border:`3px solid ${selColor===c ? t.text : 'transparent'}`,
+              }} />
+            ))}
+          </div>
+          <div style={{ display:'flex', gap:8 }}>
+            <button onClick={() => setShowForm(false)} style={{
+              flex:1, padding:'10px', borderRadius:10,
+              background:t.surface2, color:t.text2, fontSize:14, fontWeight:500,
+            }}>Abbrechen</button>
+            <button onClick={addHabit} style={{
+              flex:1, padding:'10px', borderRadius:10,
+              background:t.accent, color:'white', fontSize:14, fontWeight:600,
+            }}>Hinzufügen</button>
+          </div>
+        </div>
+      )}
+
+      <div style={{ fontSize:12, fontWeight:600, color:t.text3, padding:'0 20px 8px', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+        Aktive Habits ({habits.length})
+      </div>
+
+      <div style={{ padding:'0 16px 100px', display:'flex', flexDirection:'column', gap:8 }}>
+        {habits.map(h => {
+          const level = getLevel(h.streak);
+          return (
+            <div key={h.id} style={{
+              display:'flex', alignItems:'center', gap:14,
+              background:t.surface, border:`1px solid ${t.border}`,
+              borderRadius:14, padding:'13px 14px',
+            }}>
+              <div style={{
+                width:44, height:44, borderRadius:12, flexShrink:0,
+                background:`${h.color}18`, border:`1px solid ${h.color}30`,
+                display:'flex', alignItems:'center', justifyContent:'center', fontSize:22,
+              }}>{h.icon}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:15, fontWeight:500, color:t.text }}>{h.name}</div>
+                <div style={{ fontSize:11, color:t.text2, marginTop:2 }}>
+                  {level.icon} {level.title} · 🔥 {h.streak}d
+                </div>
+              </div>
+              <div style={{ display:'flex', gap:6 }}>
+                <button onClick={() => archiveHabit(h.id)} style={{
+                  width:32, height:32, borderRadius:8,
+                  background:t.surface2, border:`1px solid ${t.border}`,
+                  color:t.text3, fontSize:14, display:'flex', alignItems:'center', justifyContent:'center',
+                }}>⏸</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── SETTINGS PAGE ─────────────────────────────────────────────────────────────
+function SettingsPageView({ t, setPage }) {
+  const [name, setName] = useState('Samer');
+  const [username, setUsername] = useState('ishowsamo');
+  const [bio, setBio] = useState('Building better habits every day 🌱');
+  const [isPublic, setIsPublic] = useState(true);
+
+  return (
+    <div style={{ height:'100%', overflowY:'auto', background:t.bg }}>
+      <div style={{ padding:'16px 20px 8px', display:'flex', alignItems:'center', gap:12 }}>
+        <button onClick={() => setPage('today')} style={{ background:'none', color:t.accent, fontSize:16, fontWeight:600 }}>‹</button>
+        <h1 style={{ fontSize:22, fontWeight:700, color:t.text }}>Einstellungen</h1>
+      </div>
+
+      {/* Avatar */}
+      <div style={{ display:'flex', justifyContent:'center', padding:'16px 0 20px' }}>
+        <div style={{ position:'relative' }}>
+          <div style={{
+            width:80, height:80, borderRadius:'50%',
+            background:`linear-gradient(135deg, ${t.accent}, ${t.accent2})`,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontSize:30, fontWeight:800, color:'white',
+            boxShadow:`0 8px 24px ${t.accentGlow}`,
+          }}>S</div>
+          <div style={{
+            position:'absolute', bottom:2, right:2,
+            width:24, height:24, borderRadius:'50%',
+            background:t.surface, border:`2px solid ${t.bg}`,
+            display:'flex', alignItems:'center', justifyContent:'center', fontSize:12,
+          }}>📷</div>
+        </div>
+      </div>
+
+      {[
+        { label:'Name', value:name, setter:setName },
+        { label:'Username', value:username, setter:setUsername, prefix:'@' },
+        { label:'Bio', value:bio, setter:setBio, multi:true },
+      ].map(field => (
+        <div key={field.label} style={{ margin:'0 16px 12px' }}>
+          <div style={{ fontSize:12, fontWeight:600, color:t.text3, marginBottom:6, textTransform:'uppercase', letterSpacing:'0.06em' }}>{field.label}</div>
+          {field.multi ? (
+            <textarea value={field.value} onChange={e => field.setter(e.target.value)} rows={3} style={{
+              width:'100%', padding:'12px 14px', borderRadius:12,
+              background:t.surface, border:`1px solid ${t.border2}`,
+              color:t.text, fontSize:14, outline:'none', resize:'none',
+            }} />
+          ) : (
+            <div style={{ display:'flex', alignItems:'center', background:t.surface, border:`1px solid ${t.border2}`, borderRadius:12 }}>
+              {field.prefix && <span style={{ padding:'12px 0 12px 14px', color:t.text3, fontSize:14 }}>{field.prefix}</span>}
+              <input value={field.value} onChange={e => field.setter(e.target.value)} style={{
+                flex:1, padding:'12px 14px', background:'none', border:'none', color:t.text, fontSize:14, outline:'none',
+              }} />
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Public toggle */}
+      <div style={{ margin:'0 16px 20px', padding:'14px 16px', background:t.surface, border:`1px solid ${t.border}`, borderRadius:14, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <div style={{ fontSize:14, fontWeight:500, color:t.text }}>Öffentliches Profil</div>
+          <div style={{ fontSize:12, color:t.text2, marginTop:2 }}>Andere können deine Stats sehen</div>
+        </div>
+        <div onClick={() => setIsPublic(v => !v)} style={{
+          width:44, height:24, borderRadius:12, cursor:'pointer',
+          background: isPublic ? t.accent : t.surface3,
+          position:'relative', transition:'background 0.3s',
+        }}>
+          <div style={{
+            position:'absolute', top:3, left: isPublic ? 23 : 3,
+            width:18, height:18, borderRadius:'50%', background:'white',
+            transition:'left 0.3s', boxShadow:'0 1px 4px rgba(0,0,0,0.3)',
+          }} />
+        </div>
+      </div>
+
+      <div style={{ padding:'0 16px 100px', display:'flex', flexDirection:'column', gap:8 }}>
+        <button style={{
+          width:'100%', padding:'14px', borderRadius:14,
+          background:t.accent, color:'white', fontSize:15, fontWeight:600,
+          boxShadow:`0 4px 16px ${t.accentGlow}`,
+        }}>Speichern</button>
+        <button style={{
+          width:'100%', padding:'14px', borderRadius:14,
+          background:`${t.red}15`, border:`1px solid ${t.red}30`,
+          color:t.red, fontSize:15, fontWeight:500, marginTop:4,
+        }}>Ausloggen</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── ONBOARDING FLOW ─────────────────────────────────────────────────────────
+const ONBOARDING_SLIDES = [
+  {
+    icon: '✦',
+    iconBg: 'linear-gradient(135deg, #7c6dfa, #a89bfc)',
+    title: 'Willkommen bei\nHabitflow',
+    sub: 'Dein persönlicher Coach für bessere Gewohnheiten – jeden Tag.',
+    cta: 'Los geht\'s',
+  },
+  {
+    icon: '🔥',
+    iconBg: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+    title: 'Streaks &\nMotivation',
+    sub: 'Baue Streaks auf, steige im Level auf – von Beginner bis Legend.',
+    cta: 'Weiter',
+    feature: { label:'Level-System', desc:'Beginner → Consistent → Warrior → Champion → Legend' },
+  },
+  {
+    icon: '📊',
+    iconBg: 'linear-gradient(135deg, #06b6d4, #34d399)',
+    title: 'Deine Stats\nim Blick',
+    sub: 'Detaillierte Charts zeigen dir deinen Fortschritt täglich, wöchentlich und monatlich.',
+    cta: 'Weiter',
+    feature: { label:'Statistiken', desc:'Wochentrend · Erfolgsquote · Perfekte Tage' },
+  },
+  {
+    icon: '👥',
+    iconBg: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+    title: 'Community &\nFreunde',
+    sub: 'Adde Freunde, schicke Freundschaftsanfragen und vergleiche euch im Leaderboard.',
+    cta: 'Weiter',
+    feature: { label:'Social Features', desc:'Freundschaftsanfragen · Leaderboard · Profile' },
+  },
+  {
+    icon: '🎯',
+    iconBg: 'linear-gradient(135deg, #10b981, #34d399)',
+    title: 'Bereit\nanzufangen?',
+    sub: 'Starte jetzt mit deinen ersten Habits. Du kannst jederzeit neue hinzufügen.',
+    cta: 'App starten',
+    final: true,
+  },
+];
+
+function OnboardingFlow({ t, onFinish }) {
+  const [step, setStep] = useState(0);
+  const [animDir, setAnimDir] = useState(1);
+  const [visible, setVisible] = useState(true);
+  const slide = ONBOARDING_SLIDES[step];
+  const total = ONBOARDING_SLIDES.length;
+
+  const goNext = () => {
+    setVisible(false);
+    setTimeout(() => {
+      setAnimDir(1);
+      if (step < total - 1) setStep(s => s + 1);
+      else onFinish();
+      setVisible(true);
+    }, 200);
+  };
+  const goBack = () => {
+    if (step === 0) return;
+    setVisible(false);
+    setTimeout(() => { setAnimDir(-1); setStep(s => s - 1); setVisible(true); }, 200);
+  };
+  const skip = () => onFinish();
+
+  return (
+    <div style={{
+      height:'100%', background: t.bg, display:'flex', flexDirection:'column',
+      padding:'20px 0 0', overflow:'hidden', position:'relative',
+    }}>
+      {/* Skip */}
+      {!slide.final && (
+        <button onClick={skip} style={{
+          position:'absolute', top:20, right:20,
+          background:'none', color:t.text3, fontSize:13, fontWeight:500, zIndex:10,
+        }}>Überspringen</button>
+      )}
+
+      {/* Animated content */}
+      <div style={{
+        flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+        padding:'40px 28px 0',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : `translateY(${animDir * 20}px)`,
+        transition:'opacity 0.2s ease, transform 0.2s ease',
+      }}>
+        {/* Icon bubble */}
+        <div style={{
+          width:100, height:100, borderRadius:30,
+          background: slide.iconBg,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          fontSize:44, marginBottom:32,
+          boxShadow:`0 20px 60px ${t.accentGlow}`,
+        }}>{slide.icon}</div>
+
+        {/* Title */}
+        <h1 style={{
+          fontSize:30, fontWeight:800, color:t.text,
+          textAlign:'center', letterSpacing:'-0.5px', lineHeight:1.2,
+          marginBottom:14, whiteSpace:'pre-line',
+        }}>{slide.title}</h1>
+
+        {/* Subtitle */}
+        <p style={{
+          fontSize:15, color:t.text2, textAlign:'center',
+          lineHeight:1.6, maxWidth:280,
+        }}>{slide.sub}</p>
+
+        {/* Feature pill */}
+        {slide.feature && (
+          <div style={{
+            marginTop:28, padding:'14px 20px', borderRadius:16,
+            background: t.surface, border:`1px solid ${t.border2}`,
+            width:'100%',
+          }}>
+            <div style={{ fontSize:11, fontWeight:700, color:t.accent, letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:4 }}>
+              {slide.feature.label}
+            </div>
+            <div style={{ fontSize:13, color:t.text2, lineHeight:1.5 }}>
+              {slide.feature.desc}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom controls */}
+      <div style={{ padding:'24px 28px 32px' }}>
+        {/* Dots */}
+        <div style={{ display:'flex', justifyContent:'center', gap:6, marginBottom:24 }}>
+          {ONBOARDING_SLIDES.map((_, i) => (
+            <div key={i} style={{
+              height:4, borderRadius:99,
+              width: i === step ? 24 : 6,
+              background: i === step ? t.accent : t.surface3,
+              transition:'all 0.3s ease',
+            }} />
+          ))}
+        </div>
+
+        <div style={{ display:'flex', gap:10 }}>
+          {step > 0 && (
+            <button onClick={goBack} style={{
+              flex:1, padding:'15px', borderRadius:14,
+              background: t.surface, border:`1px solid ${t.border2}`,
+              color:t.text2, fontSize:15, fontWeight:500,
+            }}>Zurück</button>
+          )}
+          <button onClick={goNext} style={{
+            flex:2, padding:'15px', borderRadius:14,
+            background:`linear-gradient(135deg, ${t.accent}, ${t.accent2})`,
+            color:'white', fontSize:15, fontWeight:700,
+            boxShadow:`0 6px 20px ${t.accentGlow}`,
+          }}>{slide.cta}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── PROFILE VIEW ─────────────────────────────────────────────────────────────
+const PROFILE_FRIENDS = {
+  maxm: {
+    name:'Max Müller', username:'maxm', bio:'Early bird & gym addict 💪', hue:220, level:12,
+    streak:22, monthPct:0.83, habits:[
+      { id:1, name:'5 Uhr aufstehen', icon:'🌅', color:'#f59e0b', streak:22, done:true },
+      { id:2, name:'Gym',             icon:'💪', color:'#ef4444', streak:18, done:true },
+      { id:3, name:'Lesen',           icon:'📚', color:'#3b82f6', streak:14, done:false },
+    ],
+  },
+  sarak: {
+    name:'Sara K.', username:'sarak', bio:'Mindfulness & Yoga 🧘', hue:340, level:8,
+    streak:15, monthPct:0.67, habits:[
+      { id:1, name:'Meditation', icon:'🧘', color:'#8b5cf6', streak:15, done:true },
+      { id:2, name:'Yoga',       icon:'🌊', color:'#06b6d4', streak:12, done:true },
+    ],
+  },
+  jonasb: {
+    name:'Jonas B.', username:'jonasb', bio:'No excuses 🔥', hue:160, level:18,
+    streak:30, monthPct:1.0, habits:[
+      { id:1, name:'Kalte Dusche',     icon:'🚿', color:'#06b6d4', streak:30, done:true },
+      { id:2, name:'Kein Alkohol',     icon:'🍺', color:'#22c55e', streak:30, done:true },
+      { id:3, name:'Social Media',     icon:'📵', color:'#f97316', streak:28, done:true },
+      { id:4, name:'Gym',              icon:'💪', color:'#ef4444', streak:25, done:true },
+    ],
+  },
+  lenaw: {
+    name:'Lena Winter', username:'lenaw', bio:'Building better habits ✨', hue:40, level:5,
+    streak:9, monthPct:0.5, habits:[
+      { id:1, name:'Lesen', icon:'📖', color:'#3b82f6', streak:9, done:false },
+      { id:2, name:'Sport', icon:'🏃', color:'#22c55e', streak:6, done:true },
+    ],
+  },
+};
+
+function ProfileView({ t, username, onBack, friendships, setFriendships }) {
+  const profile = PROFILE_FRIENDS[username];
+  if (!profile) return null;
+  const level = getLevel(profile.streak);
+  const fs = friendships[username] || 'none'; // 'none' | 'pending' | 'friends'
+
+  const handleFriendAction = () => {
+    if (fs === 'none') setFriendships(prev => ({ ...prev, [username]: 'pending' }));
+    else if (fs === 'friends') setFriendships(prev => ({ ...prev, [username]: 'none' }));
+  };
+
+  const btnLabel = fs === 'none' ? '+ Adden' : fs === 'pending' ? '⏳ Anfrage gesendet' : '✓ Befreundet';
+  const btnStyle = {
+    padding:'9px 20px', borderRadius:20, fontSize:13, fontWeight:600,
+    background: fs === 'friends' ? `${t.green}20` : fs === 'pending' ? t.surface2 : t.accent,
+    color: fs === 'friends' ? t.green : fs === 'pending' ? t.text2 : 'white',
+    border: fs === 'friends' ? `1px solid ${t.green}50` : fs === 'pending' ? `1px solid ${t.border2}` : 'none',
+    cursor: fs === 'pending' ? 'default' : 'pointer',
+    boxShadow: fs === 'none' ? `0 4px 12px ${t.accentGlow}` : 'none',
+  };
+
+  return (
+    <div style={{ height:'100%', overflowY:'auto', background:t.bg }}>
+      {/* Back header */}
+      <div style={{ padding:'16px 20px 0', display:'flex', alignItems:'center', gap:10 }}>
+        <button onClick={onBack} style={{ background:'none', color:t.accent, fontSize:15, fontWeight:600, display:'flex', alignItems:'center', gap:4 }}>
+          <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+            <path d="M7 1L1 7l6 6" stroke={t.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Zurück
+        </button>
+      </div>
+
+      {/* Hero */}
+      <div style={{ padding:'20px 20px 16px', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
+        <div style={{
+          width:80, height:80, borderRadius:'50%',
+          background:`hsl(${profile.hue},55%,38%)`,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          fontSize:28, fontWeight:800, color:'white', marginBottom:12,
+          boxShadow:`0 8px 24px hsl(${profile.hue},55%,38%)44`,
+        }}>
+          {profile.name.split(' ').map(w=>w[0]).join('').slice(0,2)}
+        </div>
+        <h1 style={{ fontSize:22, fontWeight:700, color:t.text, letterSpacing:'-0.3px' }}>{profile.name}</h1>
+        <p style={{ fontSize:13, color:t.text2, marginTop:2 }}>@{profile.username}</p>
+        {profile.bio && <p style={{ fontSize:13, color:t.text2, marginTop:6, fontStyle:'italic' }}>{profile.bio}</p>}
+        <div style={{ marginTop:14 }}>
+          <button onClick={handleFriendAction} disabled={fs==='pending'} style={btnStyle}>{btnLabel}</button>
+        </div>
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display:'flex', gap:8, padding:'0 16px 12px' }}>
+        {[
+          { val:`🔥 ${profile.streak}`, label:'Best Streak', color:t.gold },
+          { val:profile.habits.length,  label:'Habits',      color:t.text },
+          { val:`${Math.round(profile.monthPct*100)}%`, label:'Dieser Monat', color:t.green },
+        ].map((s,i) => (
+          <div key={i} style={{
+            flex:1, padding:'12px 10px', borderRadius:14, textAlign:'center',
+            background:t.surface, border:`1px solid ${t.border}`,
+          }}>
+            <div style={{ fontSize:18, fontWeight:800, color:s.color, letterSpacing:'-0.5px' }}>{s.val}</div>
+            <div style={{ fontSize:10, color:t.text2, marginTop:3, fontWeight:500 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Level card */}
+      <div style={{ margin:'0 16px 12px', padding:'14px 16px', background:t.surface, border:`1px solid ${t.border}`, borderRadius:14, display:'flex', alignItems:'center', gap:12 }}>
+        <div style={{ fontSize:26 }}>{level.icon}</div>
+        <div style={{ flex:1 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
+            <span style={{ fontSize:12, fontWeight:600, color:t.accent }}>Lvl {level.lvl} · {level.title}</span>
+            <span style={{ fontSize:11, color:t.text2 }}>{profile.streak}{level.next ? `/${level.next}` : ''} Tage</span>
+          </div>
+          <div style={{ height:4, background:t.surface3, borderRadius:99, overflow:'hidden' }}>
+            <div style={{
+              height:'100%', borderRadius:99,
+              background:`linear-gradient(90deg, ${t.accent}, ${t.accent2})`,
+              width: level.next ? `${Math.min(100,(profile.streak/level.next)*100)}%` : '100%',
+            }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Habits */}
+      <div style={{ padding:'0 16px 100px' }}>
+        <div style={{ fontSize:12, fontWeight:600, color:t.text3, marginBottom:8, letterSpacing:'0.06em', textTransform:'uppercase' }}>
+          Habits & Streaks
+        </div>
+        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          {profile.habits.map(h => (
+            <div key={h.id} style={{
+              display:'flex', alignItems:'center', gap:12,
+              background:t.surface, border:`1px solid ${h.done ? h.color+'35' : t.border}`,
+              borderRadius:14, padding:'12px 14px',
+              boxShadow: h.done ? `0 2px 8px ${h.color}15` : 'none',
+            }}>
+              <div style={{
+                width:40, height:40, borderRadius:11, flexShrink:0,
+                background:`${h.color}18`, border:`1px solid ${h.color}28`,
+                display:'flex', alignItems:'center', justifyContent:'center', fontSize:20,
+              }}>{h.icon}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:14, fontWeight:500, color:t.text }}>{h.name}</div>
+                {h.streak > 0 && <div style={{ fontSize:11, color:t.text2, marginTop:1 }}>🔥 {h.streak} Tage Streak</div>}
+              </div>
+              <div style={{
+                width:26, height:26, borderRadius:'50%',
+                background: h.done ? t.green : 'transparent',
+                border:`2px solid ${h.done ? t.green : t.border2}`,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                boxShadow: h.done ? `0 0 10px ${t.green}50` : 'none',
+              }}>
+                {h.done && <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M1.5 6l3 3 6-5.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── IN-APP TUTORIAL OVERLAY ─────────────────────────────────────────────────
+const TUTORIAL_STEPS = [
+  {
+    id: 'track',
+    page: 'today',
+    title: 'Habits tracken',
+    desc: 'Tippe auf einen Habit um ihn für heute als erledigt zu markieren. Der grüne Haken bestätigt deinen Fortschritt.',
+    arrow: 'down',
+    spotX: '50%', spotY: '62%',
+    tipX: '50%', tipY: '73%',
+    icon: '✅',
+  },
+  {
+    id: 'ring',
+    page: 'today',
+    title: 'Tagesfortschritt',
+    desc: 'Der Ring zeigt wie viele deiner Habits du heute bereits erledigt hast. Ziel: 100%!',
+    arrow: 'up',
+    spotX: '28%', spotY: '35%',
+    tipX: '50%', tipY: '20%',
+    icon: '⭕',
+  },
+  {
+    id: 'level',
+    page: 'today',
+    title: 'Dein Level & XP',
+    desc: 'Mit jedem Streak-Tag steigst du im Level auf – von Beginner bis zur Legende.',
+    arrow: 'up',
+    spotX: '50%', spotY: '27%',
+    tipX: '50%', tipY: '18%',
+    icon: '🏆',
+  },
+  {
+    id: 'stats',
+    page: 'stats',
+    title: 'Statistiken',
+    desc: 'Hier siehst du deinen Wochentrend, Erfolgsquoten pro Habit und deine besten Streaks.',
+    arrow: 'center',
+    spotX: '50%', spotY: '45%',
+    tipX: '50%', tipY: '60%',
+    icon: '📊',
+  },
+  {
+    id: 'addhabit',
+    page: 'habits',
+    title: 'Habit hinzufügen',
+    desc: 'Tippe auf das + oben rechts um einen neuen Habit zu erstellen. Icon, Farbe und Erinnerung wählen.',
+    arrow: 'up',
+    spotX: '88%', spotY: '8%',
+    tipX: '50%', tipY: '20%',
+    icon: '➕',
+  },
+  {
+    id: 'friends',
+    page: 'social',
+    title: 'Freunde adden',
+    desc: 'Im "Suchen" Tab kannst du nach Usernamen suchen und eine Freundschaftsanfrage (FA) schicken.',
+    arrow: 'center',
+    spotX: '50%', spotY: '50%',
+    tipX: '50%', tipY: '62%',
+    icon: '👥',
+  },
+];
+
+function TutorialOverlay({ t, onFinish, setPage }) {
+  const [step, setStep] = useState(0);
+  const [animIn, setAnimIn] = useState(true);
+  const current = TUTORIAL_STEPS[step];
+  const total = TUTORIAL_STEPS.length;
+
+  const go = (dir) => {
+    setAnimIn(false);
+    setTimeout(() => {
+      const next = step + dir;
+      if (next >= total) { onFinish(); return; }
+      if (next < 0) { onFinish(); return; }
+      setPage(TUTORIAL_STEPS[next].page);
+      setStep(next);
+      setAnimIn(true);
+    }, 180);
+  };
+
+  // Navigate to the right page for this step
+  useEffect(() => {
+    setPage(current.page);
+  }, [step]);
+
+  const spotSize = 110;
+
+  return (
+    <div style={{
+      position:'absolute', inset:0, zIndex:200, pointerEvents:'none',
+    }}>
+      {/* Dark overlay with cutout via SVG mask */}
+      <svg style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'all' }}
+        onClick={() => go(1)}>
+        <defs>
+          <mask id={`tmask-${step}`}>
+            <rect width="100%" height="100%" fill="white"/>
+            <ellipse
+              cx={current.spotX} cy={current.spotY}
+              rx={spotSize/2} ry={spotSize/2.2}
+              fill="black"
+            />
+          </mask>
+        </defs>
+        <rect width="100%" height="100%"
+          fill="rgba(0,0,0,0.72)"
+          mask={`url(#tmask-${step})`}
+        />
+      </svg>
+
+      {/* Pulsing ring around spotlight */}
+      <div style={{
+        position:'absolute',
+        left: current.spotX, top: current.spotY,
+        transform:'translate(-50%,-50%)',
+        width: spotSize+16, height: spotSize/2.2*2+16,
+        borderRadius:'50%',
+        border:`2px solid ${t.accent}`,
+        opacity: 0.7,
+        animation:'tutPulse 1.8s ease-in-out infinite',
+        pointerEvents:'none',
+      }}/>
+
+      {/* Tooltip card */}
+      <div style={{
+        position:'absolute',
+        left:'50%', top: current.tipY,
+        transform:`translate(-50%, ${current.arrow==='up'?'0':'-100%'})`,
+        width:300, maxWidth:'86%',
+        background: t.surface,
+        border:`1px solid ${t.border2}`,
+        borderRadius:20,
+        padding:'18px 20px 16px',
+        boxShadow:`0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px ${t.accent}22`,
+        opacity: animIn ? 1 : 0,
+        transform: `translate(-50%, ${current.arrow==='up'?'0':'-100%'}) translateY(${animIn?0:10}px)`,
+        transition:'opacity 0.18s ease, transform 0.18s ease',
+        pointerEvents:'all',
+      }}>
+        {/* Arrow pointer */}
+        {current.arrow === 'down' && (
+          <div style={{
+            position:'absolute', bottom:-10, left:'50%', transform:'translateX(-50%)',
+            width:0, height:0,
+            borderLeft:'10px solid transparent',
+            borderRight:'10px solid transparent',
+            borderTop:`10px solid ${t.border2}`,
+          }}/>
+        )}
+        {current.arrow === 'up' && (
+          <div style={{
+            position:'absolute', top:-10, left:'50%', transform:'translateX(-50%)',
+            width:0, height:0,
+            borderLeft:'10px solid transparent',
+            borderRight:'10px solid transparent',
+            borderBottom:`10px solid ${t.border2}`,
+          }}/>
+        )}
+
+        {/* Header */}
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+          <div style={{
+            width:36, height:36, borderRadius:10,
+            background:`linear-gradient(135deg, ${t.accent}, ${t.accent2})`,
+            display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0,
+          }}>{current.icon}</div>
+          <div>
+            <div style={{ fontSize:15, fontWeight:700, color:t.text }}>{current.title}</div>
+            <div style={{ fontSize:11, color:t.text3 }}>Schritt {step+1} von {total}</div>
+          </div>
+        </div>
+
+        <p style={{ fontSize:13, color:t.text2, lineHeight:1.6, marginBottom:14 }}>
+          {current.desc}
+        </p>
+
+        {/* Progress dots */}
+        <div style={{ display:'flex', justifyContent:'center', gap:5, marginBottom:14 }}>
+          {TUTORIAL_STEPS.map((_,i) => (
+            <div key={i} style={{
+              width: i===step ? 20 : 5, height:5, borderRadius:99,
+              background: i===step ? t.accent : i<step ? t.accent+'60' : t.surface3,
+              transition:'all 0.3s ease',
+            }}/>
+          ))}
+        </div>
+
+        {/* Buttons */}
+        <div style={{ display:'flex', gap:8 }}>
+          {step > 0 && (
+            <button onClick={(e) => { e.stopPropagation(); go(-1); }} style={{
+              flex:1, padding:'10px', borderRadius:12,
+              background:t.surface2, border:`1px solid ${t.border2}`,
+              color:t.text2, fontSize:13, fontWeight:500,
+            }}>← Zurück</button>
+          )}
+          <button onClick={(e) => { e.stopPropagation(); go(1); }} style={{
+            flex:2, padding:'10px', borderRadius:12,
+            background:`linear-gradient(135deg, ${t.accent}, ${t.accent2})`,
+            color:'white', fontSize:13, fontWeight:700,
+            boxShadow:`0 4px 14px ${t.accentGlow}`,
+          }}>{step === total-1 ? '🎉 Fertig!' : 'Weiter →'}</button>
+        </div>
+
+        <button onClick={(e) => { e.stopPropagation(); onFinish(); }} style={{
+          width:'100%', marginTop:8, padding:'6px',
+          background:'none', color:t.text3, fontSize:11,
+        }}>Tutorial überspringen</button>
+      </div>
+
+      <style>{`
+        @keyframes tutPulse {
+          0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.7; }
+          50% { transform: translate(-50%,-50%) scale(1.08); opacity: 0.35; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── SVG ICONS ────────────────────────────────────────────────────────────────
+function SunIcon({ color = 'currentColor' }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <circle cx="11" cy="11" r="4" stroke={color} strokeWidth="1.8" />
+      <path d="M11 2v2M11 18v2M2 11h2M18 11h2M4.93 4.93l1.41 1.41M15.66 15.66l1.41 1.41M4.93 17.07l1.41-1.41M15.66 6.34l1.41-1.41"
+        stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+function ChartIcon({ color = 'currentColor' }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect x="3" y="12" width="4" height="7" rx="1.5" stroke={color} strokeWidth="1.8" />
+      <rect x="9" y="8" width="4" height="11" rx="1.5" stroke={color} strokeWidth="1.8" />
+      <rect x="15" y="4" width="4" height="15" rx="1.5" stroke={color} strokeWidth="1.8" />
+    </svg>
+  );
+}
+function PeopleIcon({ color = 'currentColor' }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <circle cx="8" cy="8" r="3" stroke={color} strokeWidth="1.8" />
+      <path d="M2 19c0-3.31 2.69-6 6-6s6 2.69 6 6" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="16" cy="7" r="2.5" stroke={color} strokeWidth="1.6" />
+      <path d="M20 19c0-2.76-1.79-5.1-4.25-5.77" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function StarIcon({ color = 'currentColor' }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M11 2l2.47 5.47L19 8.55l-4 3.79.94 5.66L11 15.27l-4.94 2.73.94-5.66L3 8.55l5.53-.82L11 2z"
+        stroke={color} strokeWidth="1.8" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "darkPremium",
+  "accentOverride": ""
+}/*EDITMODE-END*/;
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [onboarded, setOnboarded] = useState(false);
+  const [tutorialDone, setTutorialDone] = useState(false);
+  const [page, setPage] = useState('today');
+  const [viewProfile, setViewProfile] = useState(null);
+  const [habits, setHabits] = useState(HABITS);
+  const [friendships, setFriendships] = useState({
+    '__incoming': ['jonasb'],
+  });
+
+  const t = { ...THEMES[tweaks.theme] };
+  if (tweaks.accentOverride) {
+    t.accent = tweaks.accentOverride;
+    t.accentGlow = tweaks.accentOverride + '33';
+  }
+
+  const showNav = onboarded && !viewProfile;
+  const showTutorial = onboarded && !tutorialDone && !viewProfile;
+
+  const renderContent = () => {
+    if (!onboarded) {
+      return <OnboardingFlow t={t} onFinish={() => { setOnboarded(true); setPage('today'); }} />;
+    }
+    if (viewProfile) {
+      return (
+        <ProfileView
+          t={t}
+          username={viewProfile}
+          onBack={() => setViewProfile(null)}
+          friendships={friendships}
+          setFriendships={setFriendships}
+        />
+      );
+    }
+    switch(page) {
+      case 'today':    return <TodayPage t={t} habits={habits} setHabits={setHabits} setPage={setPage} />;
+      case 'stats':    return <StatsPage t={t} habits={habits} />;
+      case 'social':   return (
+        <SocialPage
+          t={t}
+          friendships={friendships}
+          setFriendships={setFriendships}
+          setViewProfile={setViewProfile}
+        />
+      );
+      case 'habits':   return <HabitsPage t={t} habits={habits} setHabits={setHabits} />;
+      case 'settings': return <SettingsPageView t={t} setPage={setPage} />;
+      default:         return <TodayPage t={t} habits={habits} setHabits={setHabits} setPage={setPage} />;
+    }
+  };
+
+  return (
+    <>
+      <IOSDevice dark={tweaks.theme !== 'lightMinimal'}>
+        <div style={{ height:'100%', position:'relative', background:t.bg, overflow:'hidden' }}>
+          <div style={{ height:'100%', overflow:'hidden', position:'relative' }}>
+            {renderContent()}
+          </div>
+          {showNav && <NavBar page={page} setPage={setPage} t={t} />}
+          {showTutorial && (
+            <TutorialOverlay
+              t={t}
+              setPage={setPage}
+              onFinish={() => setTutorialDone(true)}
+            />
+          )}
+        </div>
+      </IOSDevice>
+
+      <TweaksPanel>
+        <TweakSection title="Theme">
+          <TweakRadio
+            label="Variante"
+            options={[
+              { value:'darkPremium',  label:'Dark' },
+              { value:'lightMinimal', label:'Light' },
+              { value:'vibrantDark',  label:'Neon' },
+            ]}
+            value={tweaks.theme}
+            onChange={v => setTweak('theme', v)}
+          />
+        </TweakSection>
+        <TweakSection title="Akzentfarbe">
+          <TweakColor
+            label="Eigene Farbe (leer = Standard)"
+            value={tweaks.accentOverride || t.accent}
+            onChange={v => setTweak('accentOverride', v)}
+          />
+          <TweakButton label="Farbe zurücksetzen" onClick={() => setTweak('accentOverride', '')} />
+        </TweakSection>
+        <TweakSection title="Demo">
+          <TweakButton label="Onboarding neu starten" onClick={() => { setOnboarded(false); setTutorialDone(false); setPage('today'); setViewProfile(null); }} />
+          <TweakButton label="Tutorial neu starten" onClick={() => { setTutorialDone(false); setPage('today'); setViewProfile(null); }} />
+          <TweakButton label="Profil: Jonas anzeigen" onClick={() => { setOnboarded(true); setViewProfile('jonasb'); }} />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
