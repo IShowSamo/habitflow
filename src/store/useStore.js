@@ -103,7 +103,12 @@ export const useStore = create((set, get) => ({
   // ── Update habit ──────────────────────────────────────────────────────────
   updateHabit: async (id, patch) => {
     await supabase.from('habits').update(patch).eq('id', id)
-    set((s) => ({ habits: s.habits.map(h => h.id === id ? { ...h, ...patch } : h) }))
+    if (patch.archived === true) {
+      // Remove from active list immediately
+      set((s) => ({ habits: s.habits.filter(h => h.id !== id) }))
+    } else {
+      set((s) => ({ habits: s.habits.map(h => h.id === id ? { ...h, ...patch } : h) }))
+    }
   },
 
   // ── Derived helpers ────────────────────────────────────────────────────────

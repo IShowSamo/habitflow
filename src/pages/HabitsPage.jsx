@@ -56,10 +56,10 @@ export default function HabitsPage() {
   // Restore from archive
   const restoreHabit = async (h) => {
     await supabase.from('habits').update({ archived: false }).eq('id', h.id)
-    // Refresh both lists
-    const { fetchTodayAndWeek } = useStore.getState()
-    await fetchTodayAndWeek()
-    await fetchArchived()
+    // Add back to active list in store
+    const state = useStore.getState()
+    useStore.setState({ habits: [...state.habits, { ...h, archived: false }] })
+    setArchived(prev => prev.filter(a => a.id !== h.id))
   }
 
   return (
@@ -129,8 +129,8 @@ export default function HabitsPage() {
               <div className={s.manageIcon} style={{ background: h.color + '22' }}>{h.icon}</div>
               <div className={s.manageName}>{h.name}</div>
               <div className={s.manageActions}>
-                <button className={s.archiveBtn} onClick={() => archiveHabit(h.id)} title="Deaktivieren">
-                  ⏸
+                <button className={s.archiveBtn} onClick={() => archiveHabit(h.id)}>
+                  Deaktivieren
                 </button>
               </div>
             </div>
