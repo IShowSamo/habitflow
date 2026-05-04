@@ -45,11 +45,14 @@ export const useSocialStore = create((set, get) => ({
   // ── Search users by username ───────────────────────────────────────────────
   searchUsers: async (query) => {
     if (!query || query.length < 2) { set({ searchResults: [] }); return }
-    const { data } = await supabase
+    // Search by username OR name
+    const { data, error } = await supabase
       .from('profiles')
-      .select('id, username, name, avatar_url')
-      .ilike('username', `%${query}%`)
-      .limit(10)
+      .select('id, username, name, avatar_url, is_public')
+      .or(`username.ilike.%${query}%,name.ilike.%${query}%`)
+      .eq('is_public', true)
+      .limit(15)
+    if (error) console.error('Search error:', error)
     set({ searchResults: data || [] })
   },
 
