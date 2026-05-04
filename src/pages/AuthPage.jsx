@@ -10,6 +10,20 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showReset, setShowReset] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSent, setResetSent] = useState(false)
+
+  const handleReset = async () => {
+    if (!resetEmail) return
+    setLoading(true); setError('')
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: window.location.origin + '/auth',
+    })
+    setLoading(false)
+    if (error) setError(error.message)
+    else setResetSent(true)
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -61,6 +75,35 @@ export default function AuthPage() {
             <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
               placeholder="Mindestens 6 Zeichen" required autoComplete={mode==='login'?'current-password':'new-password'} minLength={6} />
           </div>
+
+          {mode === 'login' && !showReset && (
+            <button type="button" className={s.forgotBtn}
+              onClick={() => { setShowReset(true); setError(''); setSuccess('') }}>
+              Passwort vergessen?
+            </button>
+          )}
+
+          {showReset && (
+            <div className={s.resetBox}>
+              <p className={s.resetTitle}>Passwort zurücksetzen</p>
+              {resetSent
+                ? <p className={s.resetSuccess}>✓ E-Mail gesendet! Prüfe dein Postfach.</p>
+                : <>
+                    <input className={s.resetInput} type="email"
+                      placeholder="Deine E-Mail-Adresse"
+                      value={resetEmail} onChange={e => setResetEmail(e.target.value)} />
+                    <div className={s.resetBtns}>
+                      <button type="button" className={s.resetCancel}
+                        onClick={() => { setShowReset(false); setResetSent(false) }}>Abbrechen</button>
+                      <button type="button" className={s.resetSend}
+                        onClick={handleReset} disabled={loading}>
+                        {loading ? '...' : 'Link senden'}
+                      </button>
+                    </div>
+                  </>
+              }
+            </div>
+          )}
 
           {error   && <div className={s.error}>{error}</div>}
           {success && <div className={s.success}>{success}</div>}

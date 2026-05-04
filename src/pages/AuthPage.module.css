@@ -80,3 +80,39 @@
 
 .footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text2); }
 .switchBtn { background: none; border: none; color: var(--accent2); font-size: 13px; font-weight: 600; }
+
+.forgotBtn {
+  background: none; border: none;
+  color: var(--accent2); font-size: 13px;
+  text-align: right; cursor: pointer;
+  padding: 0; margin-top: -4px;
+  align-self: flex-end;
+}
+
+.resetBox {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.resetTitle   { font-size: 14px; font-weight: 600; color: var(--text); }
+.resetSuccess { font-size: 13px; color: var(--green); }
+.resetInput {
+  width: 100%; padding: 10px 12px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--r-sm); color: var(--text); font-size: 14px; outline: none;
+}
+.resetInput:focus { border-color: var(--accent); }
+.resetBtns { display: flex; gap: 8px; }
+.resetCancel {
+  padding: 9px 14px; border-radius: var(--r-sm);
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 13px; cursor: pointer;
+}
+.resetSend {
+  flex: 1; padding: 9px; border-radius: var(--r-sm);
+  background: var(--accent); border: none;
+  color: white; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.resetSend:disabled { opacity: 0.5; }
