@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../store/useStore'
+import { supabase } from '../lib/supabase'
 import s from './HabitsPage.module.css'
 
 const EMOJIS = ['⭐','🏃','🧠','💊','🥗','😴','🧘','✍️','🎯','🚴','🙏','🌊','📖','🎵','💻','🌱','🦷','🧹','💸','❤️']
@@ -15,19 +16,23 @@ const DEFAULT_HABITS = [
   { name:'Kalte Dusche',    icon:'🚿', color:'#06b6d4', notif_time:'07:30', notif_on:true },
 ]
 
-function requestNotifPermission(cb) {
-  if (!('Notification' in window)) { alert('Push Notifications werden auf diesem Gerät nicht unterstützt.'); return }
-  Notification.requestPermission().then(perm => {
-    if (perm === 'granted') cb()
-    else alert('Benachrichtigungen wurden abgelehnt. Bitte in den Browser-Einstellungen erlauben.')
-  })
-}
-
 export default function HabitsPage() {
-  const { habits, addHabit, deleteHabit, updateHabit } = useStore()
+  const { habits, addHabit, updateHabit, user } = useStore()
+  const [archived, setArchived] = useState([])
   const [showForm, setShowForm] = useState(false)
+  const [showArchived, setShowArchived] = useState(false)
   const [seedLoading, setSeedLoading] = useState(false)
   const [form, setForm] = useState({ name:'', icon:'⭐', color:'#6c63ff', notif_time:'08:00', notif_on:true })
+
+  // Load archived habits
+  const fetchArchived = async () => {
+    if (!user) return
+    const { data } = await supabase.from('habits')
+      .select('*').eq('user_id', user.id).eq('archived', true).order('sort_order')
+    setArchived(data || [])
+  }
+
+  useEffect(() => { fetchArchived() }, [user])
 
   const handleAdd = async () => {
     if (!form.name.trim()) return
@@ -42,29 +47,19 @@ export default function HabitsPage() {
     setSeedLoading(false)
   }
 
-  const handleNotifToggle = async (h, val) => {
-    if (val) {
-      requestNotifPermission(async () => {
-        await updateHabit(h.id, { notif_on: true })
-        scheduleNotification(h)
-      })
-    } else {
-      await updateHabit(h.id, { notif_on: false })
-    }
+  // Archive (soft delete)
+  const archiveHabit = async (id) => {
+    await updateHabit(id, { archived: true })
+    await fetchArchived()
   }
 
-  const scheduleNotification = (h) => {
-    const [hr, min] = h.notif_time.split(':').map(Number)
-    const now = new Date()
-    const next = new Date()
-    next.setHours(hr, min, 0, 0)
-    if (next <= now) next.setDate(next.getDate() + 1)
-    const ms = next - now
-    setTimeout(() => {
-      if (Notification.permission === 'granted') {
-        new Notification('HabitFlow 🌿', { body: `Zeit für: ${h.icon} ${h.name}`, icon: '/icon-192.png' })
-      }
-    }, ms)
+  // Restore from archive
+  const restoreHabit = async (h) => {
+    await supabase.from('habits').update({ archived: false }).eq('id', h.id)
+    // Refresh both lists
+    const { fetchTodayAndWeek } = useStore.getState()
+    await fetchTodayAndWeek()
+    await fetchArchived()
   }
 
   return (
@@ -76,7 +71,6 @@ export default function HabitsPage() {
         </button>
       </div>
 
-      {/* Seed button if no habits */}
       {habits.length === 0 && !showForm && (
         <div className={s.emptyState}>
           <div className={s.emptyIcon}>🌱</div>
@@ -95,7 +89,6 @@ export default function HabitsPage() {
             <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
               placeholder="z.B. Meditation" type="text" className={s.input} />
           </div>
-
           <div className={s.formField}>
             <label>Icon</label>
             <div className={s.emojiGrid}>
@@ -105,7 +98,6 @@ export default function HabitsPage() {
               ))}
             </div>
           </div>
-
           <div className={s.formField}>
             <label>Farbe</label>
             <div className={s.colorRow}>
@@ -115,13 +107,11 @@ export default function HabitsPage() {
               ))}
             </div>
           </div>
-
           <div className={s.formField}>
             <label>Erinnerung</label>
             <input type="time" value={form.notif_time}
               onChange={e => setForm(f => ({...f, notif_time: e.target.value}))} className={s.input} />
           </div>
-
           <div className={s.formBtns}>
             <button className={s.cancelBtn} onClick={() => setShowForm(false)}>Abbrechen</button>
             <button className={s.confirmBtn} onClick={handleAdd}>Hinzufügen</button>
@@ -129,40 +119,46 @@ export default function HabitsPage() {
         </div>
       )}
 
-      {/* Habit list */}
+      {/* Active habits */}
       {habits.length > 0 && (
         <>
-          <div className={s.sectionLabel}>Aktive Habits</div>
+          <div className={s.sectionLabel}>Aktive Habits ({habits.length})</div>
           {habits.map(h => (
             <div key={h.id} className={s.manageCard}>
               <div className={s.manageIcon} style={{ background: h.color + '22' }}>{h.icon}</div>
               <div className={s.manageName}>{h.name}</div>
               <div className={s.manageActions}>
-                <label className={s.toggle}>
-                  <input type="checkbox" checked={h.notif_on}
-                    onChange={e => handleNotifToggle(h, e.target.checked)} />
-                  <span className={s.toggleSlider} />
-                </label>
-                <button className={s.delBtn} onClick={() => deleteHabit(h.id)}>✕</button>
+                <button className={s.archiveBtn} onClick={() => archiveHabit(h.id)} title="Deaktivieren">
+                  ⏸
+                </button>
               </div>
-            </div>
-          ))}
-
-          <div className={s.sectionLabel} style={{ marginTop: 24 }}>Erinnerungen</div>
-          {habits.map(h => (
-            <div key={h.id} className={s.notifCard}>
-              <div>
-                <div className={s.notifName}>{h.icon} {h.name}</div>
-                <div className={s.notifTime}>{h.notif_time} Uhr</div>
-              </div>
-              <label className={s.toggle}>
-                <input type="checkbox" checked={h.notif_on}
-                  onChange={e => handleNotifToggle(h, e.target.checked)} />
-                <span className={s.toggleSlider} />
-              </label>
             </div>
           ))}
         </>
+      )}
+
+      {/* Archived habits */}
+      <div className={s.archivedHeader} onClick={() => { setShowArchived(v => !v); fetchArchived() }}>
+        <span className={s.sectionLabel} style={{ margin: 0 }}>
+          Deaktivierte Habits {archived.length > 0 ? `(${archived.length})` : ''}
+        </span>
+        <span style={{ color: 'var(--text3)', fontSize: 18 }}>{showArchived ? '▲' : '▼'}</span>
+      </div>
+
+      {showArchived && (
+        archived.length === 0
+          ? <div className={s.emptyArchive}>Keine deaktivierten Habits</div>
+          : archived.map(h => (
+            <div key={h.id} className={`${s.manageCard} ${s.archivedCard}`}>
+              <div className={s.manageIcon} style={{ background: h.color + '22', opacity: 0.5 }}>{h.icon}</div>
+              <div className={s.manageName} style={{ opacity: 0.5 }}>{h.name}</div>
+              <div className={s.manageActions}>
+                <button className={s.restoreBtn} onClick={() => restoreHabit(h)} title="Wiederherstellen">
+                  ▶ Aktivieren
+                </button>
+              </div>
+            </div>
+          ))
       )}
     </div>
   )

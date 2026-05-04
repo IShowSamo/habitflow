@@ -79,3 +79,38 @@
   background: var(--green);
   border-color: var(--green);
 }
+
+/* Day navigator */
+.dayNav {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 16px 12px;
+}
+.dayNavBtn {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); font-size: 20px; line-height: 1;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.dayPicker {
+  display: flex; gap: 4px; flex: 1; overflow-x: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.dayPicker::-webkit-scrollbar { display: none; }
+.dayChip {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 6px 8px; border-radius: 10px; min-width: 36px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text2); gap: 2px; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.dayChipLabel { font-size: 10px; font-weight: 500; }
+.dayChipNum   { font-size: 13px; font-weight: 600; }
+.dayChipToday { border-color: var(--accent); color: var(--accent); }
+.dayChipActive { background: var(--accent); border-color: var(--accent); color: white; }
+
+.backToToday {
+  display: block; margin: 0 16px 10px;
+  padding: 8px 14px; border-radius: var(--r-sm);
+  background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3);
+  color: var(--accent2); font-size: 13px; font-weight: 500; width: calc(100% - 32px);
+}

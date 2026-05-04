@@ -59,8 +59,8 @@ export const useStore = create((set, get) => ({
   },
 
   // ── Toggle a habit for today ───────────────────────────────────────────────
-  toggleHabit: async (habitId) => {
-    const date = today()
+  toggleHabit: async (habitId, dateOverride) => {
+    const date = dateOverride || today()
     const current = get().logs[date]?.[habitId] ?? false
     const next = !current
 
