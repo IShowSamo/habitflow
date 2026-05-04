@@ -1,0 +1,84 @@
+.page {
+  height: 100%;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.skip {
+  position: absolute;
+  top: 20px; right: 20px;
+  background: none; border: none;
+  color: var(--text3); font-size: 13px; font-weight: 500;
+  z-index: 10; cursor: pointer;
+}
+
+.content {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 28px 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.visible { opacity: 1; transform: translateY(0); }
+.hidden  { opacity: 0; transform: translateY(16px); }
+
+.iconBubble {
+  width: 100px; height: 100px; border-radius: 30px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px; margin-bottom: 32px;
+  box-shadow: 0 20px 60px rgba(124,109,250,0.25);
+}
+
+.title {
+  font-size: 30px; font-weight: 800; color: var(--text);
+  text-align: center; letter-spacing: -0.5px; line-height: 1.2;
+  margin-bottom: 14px; white-space: pre-line;
+}
+
+.sub {
+  font-size: 15px; color: var(--text2); text-align: center;
+  line-height: 1.6; max-width: 280px;
+}
+
+.featurePill {
+  margin-top: 28px; padding: 14px 20px; border-radius: 16px;
+  background: var(--surface); border: 1px solid var(--border2);
+  width: 100%;
+}
+.featureLabel {
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px;
+}
+.featureDesc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+.bottom { padding: 24px 28px 32px; }
+
+.dots {
+  display: flex; justify-content: center; gap: 6px; margin-bottom: 24px;
+}
+.dot {
+  height: 4px; width: 6px; border-radius: 99px;
+  background: var(--surface3);
+  transition: all 0.3s ease;
+}
+.dotActive { width: 24px; background: var(--accent); }
+.dotDone   { background: rgba(124,109,250,0.4); }
+
+.btns { display: flex; gap: 10px; }
+
+.backBtn {
+  flex: 1; padding: 15px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 15px; font-weight: 500;
+}
+
+.nextBtn {
+  flex: 2; padding: 15px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; color: white; font-size: 15px; font-weight: 700;
+  box-shadow: 0 6px 20px var(--glow);
+}
+.nextBtn:active { opacity: 0.9; transform: scale(0.98); }

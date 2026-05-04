@@ -1,31 +1,34 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #0a0a0f;
-  --surface:  #12121a;
-  --surface2: #1a1a26;
-  --surface3: #22223a;
-  --accent:   #6c63ff;
-  --accent2:  #8b85ff;
-  --green:    #22c55e;
-  --red:      #ef4444;
-  --gold:     #f59e0b;
-  --text:     #f0f0ff;
-  --text2:    #9090b0;
-  --text3:    #5a5a80;
-  --border:   rgba(255,255,255,0.07);
-  --border2:  rgba(255,255,255,0.13);
-  --r:        14px;
-  --r-sm:     8px;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bot: env(safe-area-inset-bottom, 0px);
+  --bg:        #080810;
+  --surface:   #0f0f1a;
+  --surface2:  #161625;
+  --surface3:  #1e1e32;
+  --accent:    #7c6dfa;
+  --accent2:   #a89bfc;
+  --green:     #34d399;
+  --red:       #f87171;
+  --gold:      #fbbf24;
+  --text:      #f0efff;
+  --text2:     #8884aa;
+  --text3:     #4a4870;
+  --border:    rgba(255,255,255,0.06);
+  --border2:   rgba(255,255,255,0.11);
+  --r:         14px;
+  --r-sm:      10px;
+  --safe-top:  env(safe-area-inset-top, 0px);
+  --safe-bot:  env(safe-area-inset-bottom, 0px);
+  --nav-bg:    rgba(8,8,16,0.92);
+  --glow:      rgba(124,109,250,0.2);
+  --font:      'DM Sans', -apple-system, 'SF Pro Display', 'Segoe UI', sans-serif;
 }
 
 html, body, #root {
   height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, 'SF Pro Display', 'Segoe UI', sans-serif;
+  font-family: var(--font);
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
@@ -34,12 +37,8 @@ button { font-family: inherit; cursor: pointer; }
 input, textarea { font-family: inherit; }
 a { color: inherit; text-decoration: none; }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 0px; }
-
-/* Tap highlight */
 * { -webkit-tap-highlight-color: transparent; }
 
-/* Safe area padding utility */
 .safe-top    { padding-top:    calc(var(--safe-top) + 16px); }
 .safe-bottom { padding-bottom: calc(var(--safe-bot) + 90px); }

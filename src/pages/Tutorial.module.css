@@ -1,0 +1,100 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.mask {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.pulse {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0.7;
+  animation: tutPulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  left: 50%;
+  width: 300px;
+  max-width: 88%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 18px 20px 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,109,250,0.15);
+  pointer-events: all;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.tooltipIn  { opacity: 1; }
+.tooltipOut { opacity: 0; }
+
+.arrowDown {
+  position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 9px solid var(--border2);
+}
+.arrowUp {
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 9px solid var(--border2);
+}
+
+.tooltipHeader {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.tooltipIcon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.tooltipTitle { font-size: 15px; font-weight: 700; color: var(--text); }
+.tooltipStep  { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+.tooltipDesc {
+  font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 14px;
+}
+
+.progressDots {
+  display: flex; justify-content: center; gap: 5px; margin-bottom: 14px;
+}
+.progressDot {
+  height: 4px; width: 5px; border-radius: 99px;
+  background: var(--surface3); transition: all 0.3s ease;
+}
+.progressDotActive { width: 20px; background: var(--accent); }
+.progressDotDone   { background: rgba(124,109,250,0.4); }
+
+.tooltipBtns { display: flex; gap: 8px; margin-bottom: 8px; }
+.backBtn {
+  flex: 1; padding: 10px; border-radius: 12px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 13px; font-weight: 500;
+}
+.nextBtn {
+  flex: 2; padding: 10px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; color: white; font-size: 13px; font-weight: 700;
+  box-shadow: 0 4px 14px var(--glow);
+}
+.nextBtn:active { opacity: 0.9; }
+
+.skipBtn {
+  width: 100%; padding: 6px;
+  background: none; border: none;
+  color: var(--text3); font-size: 11px; cursor: pointer;
+}
