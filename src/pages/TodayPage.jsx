@@ -1,15 +1,15 @@
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { useStore } from '../store/useStore'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { useStore } from '../store/useStore'
 import s from './TodayPage.module.css'
 
 const todayKey = format(new Date(), 'yyyy-MM-dd')
-  const nav = useNavigate()
 
 export default function TodayPage() {
   const { habits, toggleHabit, isChecked, getDoneCount, getStreak, user } = useStore()
+  const nav = useNavigate()
+
   const done  = getDoneCount(todayKey)
   const total = habits.length
   const pct   = total ? done / total : 0
@@ -20,13 +20,8 @@ export default function TodayPage() {
 
   const dateStr = format(new Date(), "EEEE, d. MMMM", { locale: de })
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-  }
-
   return (
     <div className={s.page}>
-      {/* Header */}
       <div className={s.header}>
         <div>
           <h1 className={s.title}>Today</h1>
@@ -37,7 +32,6 @@ export default function TodayPage() {
         </button>
       </div>
 
-      {/* Progress ring */}
       <div className={s.ringCard}>
         <div className={s.ringRow}>
           <svg width="110" height="110" viewBox="0 0 110 110" style={{ transform: 'rotate(-90deg)' }}>
@@ -69,7 +63,6 @@ export default function TodayPage() {
         </div>
       </div>
 
-      {/* Habit list */}
       <div className={s.list}>
         {habits.map(h => {
           const checked = isChecked(h.id, todayKey)
