@@ -1,0 +1,63 @@
+import { useEffect } from 'react'
+import { Routes, Route, NavLink } from 'react-router-dom'
+import { useStore } from '../store/useStore'
+import TodayPage    from './TodayPage'
+import StatsPage    from './StatsPage'
+import CalendarPage from './CalendarPage'
+import HabitsPage   from './HabitsPage'
+import SocialPage   from './SocialPage'
+import ProfilePage  from './ProfilePage'
+import SettingsPage from './SettingsPage'
+import s from './AppShell.module.css'
+
+const NAV = [
+  { to: '/',       label: 'Today',     icon: '☀'  },
+  { to: '/stats',  label: 'Stats',     icon: '▦'  },
+  { to: '/social', label: 'Community', icon: '◎'  },
+  { to: '/habits', label: 'Habits',    icon: '✦'  },
+]
+
+export default function AppShell() {
+  const { fetchTodayAndWeek, loading } = useStore()
+  useEffect(() => { fetchTodayAndWeek() }, [])
+
+  return (
+    <div className={s.shell}>
+      <main className={s.main}>
+        {loading ? <Loader /> : (
+          <Routes>
+            <Route index                    element={<TodayPage />} />
+            <Route path="stats"             element={<StatsPage />} />
+            <Route path="calendar"          element={<CalendarPage />} />
+            <Route path="habits"            element={<HabitsPage />} />
+            <Route path="social"            element={<SocialPage />} />
+            <Route path="profile/:username" element={<ProfilePage />} />
+            <Route path="settings"          element={<SettingsPage />} />
+          </Routes>
+        )}
+      </main>
+
+      <nav className={s.nav}>
+        {NAV.map(({ to, label, icon }) => (
+          <NavLink key={to} to={to} end={to==='/'} className={({ isActive }) => `${s.navItem} ${isActive ? s.active : ''}`}>
+            <span className={s.navIcon}>{icon}</span>
+            <span className={s.navLabel}>{label}</span>
+          </NavLink>
+        ))}
+      </nav>
+    </div>
+  )
+}
+
+function Loader() {
+  return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%' }}>
+      <svg width="36" height="36" viewBox="0 0 36 36" style={{ animation:'spin 0.8s linear infinite' }}>
+        <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
+        <circle cx="18" cy="18" r="14" fill="none" stroke="var(--surface2)" strokeWidth="3" />
+        <circle cx="18" cy="18" r="14" fill="none" stroke="var(--accent)" strokeWidth="3"
+          strokeDasharray="52 36" strokeLinecap="round" />
+      </svg>
+    </div>
+  )
+}

@@ -1,0 +1,90 @@
+.page { padding: 0 0 30px; }
+
+.loadWrap {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 60vh; gap: 16px;
+}
+
+.backBtn {
+  display: inline-flex; align-items: center;
+  padding: 14px 20px 6px;
+  background: none; border: none;
+  color: var(--accent2); font-size: 15px; font-weight: 500;
+  cursor: pointer;
+}
+
+.hero {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 16px 20px 24px; text-align: center;
+}
+.heroName  { font-size: 22px; font-weight: 700; margin-top: 12px; letter-spacing: -0.3px; }
+.heroUser  { font-size: 14px; color: var(--text2); margin-top: 2px; }
+.heroBio   { font-size: 13px; color: var(--text2); margin-top: 10px; max-width: 260px; line-height: 1.5; }
+
+.heroBtn {
+  margin-top: 16px; padding: 10px 28px;
+  border-radius: 99px;
+  background: var(--accent); border: none;
+  color: white; font-size: 14px; font-weight: 600;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.heroBtn:active   { transform: scale(0.97); }
+.heroBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.heroFriended {
+  background: none;
+  border: 1.5px solid var(--border2);
+  color: var(--text2);
+}
+
+.statsRow {
+  display: flex; gap: 10px;
+  padding: 0 16px 16px;
+}
+.statBox {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 10px; text-align: center;
+}
+.statVal   { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.statLabel { font-size: 10px; color: var(--text2); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+.card {
+  margin: 0 16px 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px;
+}
+.cardTitle {
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  margin-bottom: 14px;
+}
+
+.todayRow  { display: flex; align-items: center; gap: 16px; }
+.todayPct  { font-size: 36px; font-weight: 700; letter-spacing: -1px; flex-shrink: 0; }
+.progBar   { height: 5px; background: var(--surface3); border-radius: 99px; overflow: hidden; }
+.progFill  { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--green)); transition: width 0.5s; }
+
+.habitRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.habitRow:last-child { border-bottom: none; padding-bottom: 0; }
+.habitIcon  { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+.habitInfo  { flex: 1; }
+.habitName  { font-size: 14px; font-weight: 500; }
+.habitStreak { font-size: 12px; color: var(--gold); margin-top: 2px; }
+
+.checkDot {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s;
+}
+.checkDotDone { background: var(--green); border-color: var(--green); }
+
+.barRow   { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.barRow:last-child { margin-bottom: 0; }
+.barIcon  { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.barWrap  { flex: 1; height: 6px; background: var(--surface3); border-radius: 99px; overflow: hidden; }
+.barFill  { height: 100%; border-radius: 99px; transition: width 0.5s; }
+.barPct   { font-size: 11px; color: var(--text2); min-width: 30px; text-align: right; flex-shrink: 0; }
