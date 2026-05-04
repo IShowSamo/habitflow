@@ -203,3 +203,23 @@
   font-size: 11px; color: var(--text3);
   margin-top: 5px; font-weight: 500;
 }
+
+/* Arrow nav */
+.dayNavRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 16px 10px;
+}
+.dayArrow {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-size: 20px; line-height: 1;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.2s;
+}
+.dayArrow:active { opacity: 0.6; }

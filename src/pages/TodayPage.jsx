@@ -77,22 +77,21 @@ export default function TodayPage() {
 
   const quote = getDailyQuote()
 
-  // Check streak whenever habits load (they come in async)
+  // Check streak once habits are loaded
   useEffect(() => {
     if (!habits.length) return
 
-    // Show streak reminder on login
     const bestStreak = Math.max(...habits.map(h => getStreak(h.id)), 0)
     const todayKey2  = format(new Date(), 'yyyy-MM-dd')
     const todayDone  = getDoneCount(todayKey2)
-
+    // Only show banner if real streak >= 2 and nothing tracked today yet
     if (bestStreak >= 2 && todayDone === 0) {
-      setStreakMsg(`🔥 Du hast einen ${bestStreak}-Tage Streak! Tracke heute um ihn nicht zu brechen.`)
-    } else if (bestStreak >= 7) {
-      setStreakMsg(`🏆 Wahnsinn! ${bestStreak} Tage am Stück. Weiter so!`)
+      if (bestStreak >= 7) {
+        setStreakMsg(`🏆 ${bestStreak} Tage Streak! Lass ihn nicht reißen.`)
+      } else {
+        setStreakMsg(`🔥 ${bestStreak}-Tage Streak! Tracke heute um ihn zu halten.`)
+      }
     }
-
-    // Schedule push notification
     requestAndSchedule(habits, logs)
   }, [habits.length])
 

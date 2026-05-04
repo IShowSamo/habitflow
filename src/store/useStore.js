@@ -8,7 +8,7 @@ export const useStore = create((set, get) => ({
   user: null,
   habits: [],
   logs: {},      // { 'yyyy-MM-dd': { habitId: true/false } }
-  loading: true,
+  loading: false,
   error: null,
 
   setUser: (user) => set({ user }),
@@ -127,12 +127,21 @@ export const useStore = create((set, get) => ({
 
   getStreak: (habitId) => {
     const { logs } = get()
-    const t = new Date()
+    const today = new Date()
+    const todayKey = format(today, 'yyyy-MM-dd')
+    const yestKey  = format(subDays(today, 1), 'yyyy-MM-dd')
+
+    // If neither today nor yesterday is checked → streak is 0 (broken)
+    const todayDone = !!logs[todayKey]?.[habitId]
+    const yestDone  = !!logs[yestKey]?.[habitId]
+    if (!todayDone && !yestDone) return 0
+
+    // Count backwards from whichever anchor is done
     let streak = 0
     for (let i = 0; i < 365; i++) {
-      const d = subDays(t, i)
-      const k = format(d, 'yyyy-MM-dd')
-      if (i === 0 && !logs[k]?.[habitId]) continue
+      const k = format(subDays(today, i), 'yyyy-MM-dd')
+      // Skip today if not yet tracked (streak still alive from yesterday)
+      if (i === 0 && !todayDone) continue
       if (!logs[k]?.[habitId]) break
       streak++
     }
