@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { useStore } from './store/useStore'
 import AuthPage  from './pages/AuthPage'
+import { registerPush } from './lib/push'
 import AppShell  from './pages/AppShell'
 import Tutorial  from './pages/Tutorial'
 
@@ -17,7 +18,7 @@ export default function App() {
       const u = data.session?.user ?? null
       setUser(u)
       setAuthed(!!u)
-      if (u) checkTutorial(u)
+      if (u) { checkTutorial(u); askPushPermission(u) }
       setReady(true)
     })
 
@@ -25,12 +26,20 @@ export default function App() {
       const u = session?.user ?? null
       setUser(u)
       setAuthed(!!u)
-      if (u) checkTutorial(u)
+      if (u) { checkTutorial(u); askPushPermission(u) }
       if (!u) setReady(true)
     })
 
     return () => subscription.unsubscribe()
   }, [])
+
+  const askPushPermission = async (u) => {
+    if (!('Notification' in window)) return
+    if (Notification.permission === 'default') {
+      // Small delay so UI is visible first
+      setTimeout(() => registerPush(u.id), 2000)
+    }
+  }
 
   const checkTutorial = async (u) => {
     // Check if user has seen tutorial (stored in user metadata)
