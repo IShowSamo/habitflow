@@ -99,3 +99,48 @@
   color: var(--red); font-size: 15px; font-weight: 600;
 }
 .logoutBtn:active { opacity: 0.8; }
+
+/* Avatar */
+.avatarWrap {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px; margin-bottom: 16px;
+}
+.avatarPreview {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; cursor: pointer; flex-shrink: 0;
+  overflow: hidden;
+}
+.avatarImg {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+.avatarInitials { font-size: 26px; font-weight: 700; color: white; }
+.avatarOverlay {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; opacity: 0; transition: opacity 0.2s;
+}
+.avatarPreview:hover .avatarOverlay { opacity: 1; }
+
+.avatarInfo { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.uploadBtn {
+  padding: 8px 16px; border-radius: var(--r-sm);
+  background: var(--accent); border: none;
+  color: white; font-size: 13px; font-weight: 600;
+  width: fit-content;
+}
+.uploadBtn:disabled { opacity: 0.5; }
+.uploadHint { font-size: 11px; color: var(--text3); }
+.removeBtn {
+  background: none; border: none;
+  color: var(--red); font-size: 12px; cursor: pointer;
+  text-align: left; padding: 0;
+}
+
+.errorMsg {
+  background: rgba(239,68,68,0.1); color: #fca5a5;
+  padding: 10px 13px; border-radius: var(--r-sm);
+  font-size: 13px; margin-bottom: 12px;
+}

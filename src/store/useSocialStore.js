@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
-import { format, subDays, startOfMonth } from 'date-fns'
+import { format, subDays, startOfMonth, eachDayOfInterval } from 'date-fns'
 
 export const useSocialStore = create((set, get) => ({
   friends: [],          // accepted friendships with profile info
@@ -137,12 +137,15 @@ export const useSocialStore = create((set, get) => ({
     const todayDone = (habits || []).filter(h => logs[todayKey]?.[h.id]).length
     const todayPct  = habits?.length ? todayDone / habits.length : 0
 
-    // Month pct
-    const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd')
-    const monthDays  = Object.keys(logs).filter(d => d >= monthStart)
-    const monthChecks = monthDays.reduce((a, d) =>
-      a + Object.values(logs[d]).filter(Boolean).length, 0)
-    const monthPossible = monthDays.length * (habits?.length || 1)
+    // Month pct – count ALL days from month start to today (not just logged days)
+    const now2 = new Date()
+    const mStart = startOfMonth(now2)
+    const allMonthDays = eachDayOfInterval({ start: mStart, end: now2 })
+    const monthChecks = allMonthDays.reduce((a, d) => {
+      const k = format(d, 'yyyy-MM-dd')
+      return a + (habits || []).filter(h => logs[k]?.[h.id]).length
+    }, 0)
+    const monthPossible = allMonthDays.length * (habits?.length || 1)
     const monthPct = monthPossible ? monthChecks / monthPossible : 0
 
     set({ viewedProfile: { profile, habits: habits || [], logs, streaks, todayPct, monthPct }, loading: false })
