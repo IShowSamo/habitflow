@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { format, subDays, isToday, isFuture } from 'date-fns'
+import { useState, useRef } from 'react'
+import { format, subDays, addDays, isToday, isFuture } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
@@ -9,6 +9,7 @@ export default function TodayPage() {
   const { habits, toggleHabit, isChecked, getDoneCount, getStreak, user, fetchLogs } = useStore()
   const nav = useNavigate()
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const touchStartX = useRef(null)
 
   const dateKey = format(selectedDate, 'yyyy-MM-dd')
   const isCurrentDay = isToday(selectedDate)
@@ -24,6 +25,32 @@ export default function TodayPage() {
 
   const goToToday = () => setSelectedDate(new Date())
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = async (e) => {
+    if (touchStartX.current === null) return
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    touchStartX.current = null
+    if (Math.abs(dx) < 50) return  // ignore small swipes
+    if (dx < 0) {
+      // swipe left = go to next day (newer)
+      if (!isCurrentDay) {
+        const next = addDays(selectedDate, 1)
+        setSelectedDate(next)
+        const k = format(next, 'yyyy-MM-dd')
+        await fetchLogs(k, k)
+      }
+    } else {
+      // swipe right = go to previous day (older)
+      const prev = subDays(selectedDate, 1)
+      setSelectedDate(prev)
+      const k = format(prev, 'yyyy-MM-dd')
+      await fetchLogs(k, k)
+    }
+  }
+
   // Build last 7 days for quick picker
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = subDays(new Date(), 6 - i)
@@ -31,7 +58,7 @@ export default function TodayPage() {
   })
 
   return (
-    <div className={s.page}>
+    <div className={s.page} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {/* Header */}
       <div className={s.header}>
         <div>
