@@ -6,48 +6,49 @@ import AuthPage from './pages/AuthPage'
 import AppShell from './pages/AppShell'
 
 export default function App() {
-  const { user, setUser } = useStore()
-  // null = still checking, false = not logged in, object = logged in
-  const [authState, setAuthState] = useState(null)
+  const { setUser } = useStore()
+  const [ready, setReady]   = useState(false)
+  const [authed, setAuthed] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      const u = data.session?.user ?? false
-      setUser(u || null)
-      setAuthState(u)
+      const u = data.session?.user ?? null
+      setUser(u)
+      setAuthed(!!u)
+      setReady(true)
     })
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      const u = session?.user ?? false
-      setUser(u || null)
-      setAuthState(u)
+      const u = session?.user ?? null
+      setUser(u)
+      setAuthed(!!u)
+      setReady(true)
     })
+
     return () => subscription.unsubscribe()
   }, [])
 
-  // Still checking session - show nothing (transparent, not black)
-  if (authState === null) return (
+  if (!ready) return (
     <div style={{
       height: '100vh',
-      background: 'var(--bg)',
+      background: '#0a0a0f',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 16,
+      gap: 12,
     }}>
-      <div style={{ fontSize: 48 }}>🌿</div>
-      <p style={{ color: 'var(--text2)', fontSize: 14, fontWeight: 500 }}>HabitFlow</p>
+      <div style={{ fontSize: 52 }}>🌿</div>
+      <p style={{ color: '#9090b0', fontSize: 14 }}>HabitFlow</p>
     </div>
   )
 
-  // Not logged in
-  if (authState === false) return (
+  if (!authed) return (
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
-      <Route path="/*" element={<Navigate to="/auth" replace />} />
+      <Route path="/*"   element={<Navigate to="/auth" replace />} />
     </Routes>
   )
 
-  // Logged in
   return <AppShell />
 }
