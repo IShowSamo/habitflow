@@ -78,10 +78,6 @@ export default function TodayPage() {
       </div>
 
       {/* Streak banner */}
-      {streakMsg && isCurrentDay && (
-        <div className={s.streakBanner} onClick={() => setStreakMsg(null)}>
-          <span>{streakMsg}</span>
-          <span className={s.streakBannerClose}>✕</span>
         </div>
       )}
 
