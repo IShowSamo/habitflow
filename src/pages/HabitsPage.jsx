@@ -66,8 +66,9 @@ export default function HabitsPage() {
     <div className={s.page}>
       <div className={s.header}>
         <h1 className={s.title}>My Habits</h1>
-        <button className={s.addBtn} onClick={() => setShowForm(v => !v)}>
-          {showForm ? '✕' : '+ Neu'}
+        <button className={`${s.addBtn} ${showForm ? s.addBtnClose : ''}`}
+          onClick={() => setShowForm(v => !v)}>
+          {showForm ? '✕ Schließen' : '+ Neu'}
         </button>
       </div>
 

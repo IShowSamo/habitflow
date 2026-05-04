@@ -11,30 +11,30 @@ import SettingsPage from './SettingsPage'
 import s from './AppShell.module.css'
 
 const NAV = [
-  { to: '/',       label: 'Today',     icon: '☀'  },
-  { to: '/stats',  label: 'Stats',     icon: '▦'  },
-  { to: '/social', label: 'Community', icon: '◎'  },
-  { to: '/habits', label: 'Habits',    icon: '✦'  },
+  { to: '/',       label: 'Today',     icon: '☀' },
+  { to: '/stats',  label: 'Stats',     icon: '▦' },
+  { to: '/social', label: 'Community', icon: '◎' },
+  { to: '/habits', label: 'Habits',    icon: '✦' },
 ]
 
 export default function AppShell() {
-  const { fetchTodayAndWeek, loading } = useStore()
+  const { fetchTodayAndWeek } = useStore()
+
+  // Fetch in background — don't block render
   useEffect(() => { fetchTodayAndWeek() }, [])
 
   return (
     <div className={s.shell}>
       <main className={s.main}>
-        {loading ? <Loader /> : (
-          <Routes>
-            <Route index                    element={<TodayPage />} />
-            <Route path="stats"             element={<StatsPage />} />
-            <Route path="calendar"          element={<CalendarPage />} />
-            <Route path="habits"            element={<HabitsPage />} />
-            <Route path="social"            element={<SocialPage />} />
-            <Route path="profile/:username" element={<ProfilePage />} />
-            <Route path="settings"          element={<SettingsPage />} />
-          </Routes>
-        )}
+        <Routes>
+          <Route index                    element={<TodayPage />} />
+          <Route path="stats"             element={<StatsPage />} />
+          <Route path="calendar"          element={<CalendarPage />} />
+          <Route path="habits"            element={<HabitsPage />} />
+          <Route path="social"            element={<SocialPage />} />
+          <Route path="profile/:username" element={<ProfilePage />} />
+          <Route path="settings"          element={<SettingsPage />} />
+        </Routes>
       </main>
 
       <nav className={s.nav}>
@@ -45,19 +45,6 @@ export default function AppShell() {
           </NavLink>
         ))}
       </nav>
-    </div>
-  )
-}
-
-function Loader() {
-  return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%' }}>
-      <svg width="36" height="36" viewBox="0 0 36 36" style={{ animation:'spin 0.8s linear infinite' }}>
-        <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
-        <circle cx="18" cy="18" r="14" fill="none" stroke="var(--surface2)" strokeWidth="3" />
-        <circle cx="18" cy="18" r="14" fill="none" stroke="var(--accent)" strokeWidth="3"
-          strokeDasharray="52 36" strokeLinecap="round" />
-      </svg>
     </div>
   )
 }

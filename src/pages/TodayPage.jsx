@@ -66,6 +66,7 @@ export default function TodayPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [streakMsg, setStreakMsg] = useState(null)
   const touchStartX = useRef(null)
+  const touchStartY = useRef(null)
 
   const dateKey      = format(selectedDate, 'yyyy-MM-dd')
   const isCurrentDay = isToday(selectedDate)
@@ -76,7 +77,7 @@ export default function TodayPage() {
 
   const quote = getDailyQuote()
 
-  // On mount: check streak, request notifications, show login message
+  // Check streak whenever habits load (they come in async)
   useEffect(() => {
     if (!habits.length) return
 
@@ -93,21 +94,29 @@ export default function TodayPage() {
 
     // Schedule push notification
     requestAndSchedule(habits, logs)
-  }, [habits])
+  }, [habits.length])
 
   const goToToday = () => setSelectedDate(new Date())
 
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX }
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
   const handleTouchEnd = async (e) => {
     if (touchStartX.current === null) return
     const dx = e.changedTouches[0].clientX - touchStartX.current
+    const dy = e.changedTouches[0].clientY - touchStartY.current
     touchStartX.current = null
-    if (Math.abs(dx) < 50) return
+    touchStartY.current = null
+    // Only trigger if horizontal swipe is dominant (not a scroll)
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * 0.8) return
     if (dx < 0 && !isCurrentDay) {
+      // swipe left = newer day
       const next = addDays(selectedDate, 1)
       setSelectedDate(next)
       await fetchLogs(format(next, 'yyyy-MM-dd'), format(next, 'yyyy-MM-dd'))
     } else if (dx > 0) {
+      // swipe right = older day
       const prev = subDays(selectedDate, 1)
       setSelectedDate(prev)
       await fetchLogs(format(prev, 'yyyy-MM-dd'), format(prev, 'yyyy-MM-dd'))
