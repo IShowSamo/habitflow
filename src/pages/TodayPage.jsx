@@ -28,7 +28,6 @@ export default function TodayPage() {
   const { habits, toggleHabit, isChecked, getDoneCount, getStreak, user, fetchLogs, logs } = useStore()
   const nav = useNavigate()
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [streakMsg, setStreakMsg] = useState(null)
 
   const dateKey      = format(selectedDate, 'yyyy-MM-dd')
   const isCurrentDay = isToday(selectedDate)
@@ -38,17 +37,6 @@ export default function TodayPage() {
   const pct   = total ? done / total : 0
   const quote = getDailyQuote()
   const R = 44, circ = 2 * Math.PI * R, dash = circ * pct
-
-  useEffect(() => {
-    if (!habits.length) return
-    const bestStreak = Math.max(...habits.map(h => getStreak(h.id)), 0)
-    const todayDone  = getDoneCount(format(new Date(), 'yyyy-MM-dd'))
-    if (bestStreak >= 2 && todayDone === 0) {
-      setStreakMsg(bestStreak >= 7
-        ? `🏆 ${bestStreak} Tage Streak! Lass ihn nicht reißen.`
-        : `🔥 ${bestStreak}-Tage Streak! Tracke heute um ihn zu halten.`)
-    }
-  }, [habits.length])
 
   const goPrev = async () => {
     const prev = subDays(selectedDate, 7)
