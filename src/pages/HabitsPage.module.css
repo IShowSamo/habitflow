@@ -9,21 +9,20 @@
 .title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
 
 .addBtn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 18px;
-  border-radius: 99px;
+  width: 36px; height: 36px;
+  border-radius: 10px;
   background: var(--accent);
   border: none;
   color: white;
-  font-size: 15px; font-weight: 600;
-  box-shadow: 0 4px 14px rgba(108,99,255,0.35);
+  font-size: 22px; font-weight: 300;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px var(--glow);
   transition: opacity 0.2s, transform 0.2s;
 }
 .addBtn:active { opacity: 0.85; transform: scale(0.95); }
 .addBtnClose {
   background: var(--surface3);
   box-shadow: none;
-  color: var(--text2);
 }
 
 .sectionLabel {
@@ -95,24 +94,16 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 22px; flex-shrink: 0;
 }
-.manageName { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.manageName { flex: 1; }
 .manageHabitName   { font-size: 15px; font-weight: 500; color: var(--text); }
 .manageHabitLevel  { font-size: 11px; color: var(--text2); margin-top: 2px; }
 .manageActions { display: flex; align-items: center; gap: 8px; }
-/* inline archive button */
 
 .archiveBtn {
-  padding: 6px 14px;
-  border-radius: 20px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  flex-shrink: 0;
-  min-width: 60px;
-  text-align: center;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text3); font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
 }
 .archiveBtn:active { opacity: 0.7; }
 
@@ -143,4 +134,19 @@
 .emptyArchive {
   text-align: center; padding: 16px;
   font-size: 13px; color: var(--text3);
+}
+
+/* Force single-line pause button */
+.archiveBtn {
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  background: var(--surface2) !important;
+  border: 1px solid var(--border2) !important;
+  color: var(--text2) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  line-height: 1.4 !important;
 }

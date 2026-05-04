@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { useStore } from './store/useStore'
 import AuthPage from './pages/AuthPage'
@@ -7,22 +7,36 @@ import AppShell from './pages/AppShell'
 
 export default function App() {
   const { setUser } = useStore()
-  const [ready, setReady]   = useState(false)
+  const [ready,  setReady]  = useState(false)
   const [authed, setAuthed] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
+    // Check existing session on mount
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user ?? null
       setUser(u)
       setAuthed(!!u)
       setReady(true)
+      // If already logged in but stuck on /auth → push to root
+      if (u && window.location.pathname === '/auth') {
+        navigate('/', { replace: true })
+      }
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+    // Listen for sign-in / sign-out events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null
       setUser(u)
       setAuthed(!!u)
       setReady(true)
+
+      if (event === 'SIGNED_IN') {
+        navigate('/', { replace: true })
+      }
+      if (event === 'SIGNED_OUT') {
+        navigate('/auth', { replace: true })
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -50,5 +64,9 @@ export default function App() {
     </Routes>
   )
 
-  return <AppShell />
+  return (
+    <Routes>
+      <Route path="/*" element={<AppShell />} />
+    </Routes>
+  )
 }
