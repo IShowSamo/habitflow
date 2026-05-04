@@ -126,10 +126,19 @@ export default function SocialPage() {
                   <div className={s.cardSub}>@{entry.username}</div>
                 </div>
                 <div className={s.lbToday}>
-                  {entry.today_checks}<span>/{entry.total_habits}</span>
+                  <span className={s.lbTodayNum}>{entry.today_checks}</span>
+                  <span className={s.lbTodayTotal}>/{entry.total_habits}</span>
                 </div>
                 <div className={s.lbLevel}>
-                  {(() => { const l = getLevel(entry.streak_days || 0); return <span title={l.name + ' · ' + (entry.streak_days||0) + ' Tage'}>{l.icon} {l.name}</span> })()}
+                  {(() => {
+                    const l = getLevel(entry.streak_days || 0)
+                    return (
+                      <div className={s.lbLevelBadge}>
+                        <span>{l.icon}</span>
+                        <span>{l.name}</span>
+                      </div>
+                    )
+                  })()}
                 </div>
               </div>
             )

@@ -1,92 +1,39 @@
 .page { padding: 0 0 24px; }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 52px 20px 12px;
 }
-.title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+.title { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
 
+/* + Neu button - clean pill */
 .addBtn {
-  width: 36px; height: 36px;
-  border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 10px 20px;
+  border-radius: 99px;
   background: var(--accent);
-  border: none;
-  color: white;
-  font-size: 22px; font-weight: 300;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px var(--glow);
-  transition: opacity 0.2s, transform 0.2s;
+  border: none; color: white;
+  font-size: 14px; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(108,99,255,0.45);
+  transition: transform 0.15s, opacity 0.2s;
+  white-space: nowrap;
 }
-.addBtn:active { opacity: 0.85; transform: scale(0.95); }
+.addBtn:active { transform: scale(0.95); opacity: 0.85; }
 .addBtnClose {
-  background: var(--surface3);
-  box-shadow: none;
+  background: var(--surface2); box-shadow: none; color: var(--text2);
 }
 
 .sectionLabel {
-  font-size: 11px; font-weight: 600; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 0.08em;
-  padding: 0 20px 8px;
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  padding: 0 20px; margin-bottom: 10px;
 }
 
-/* Add form */
-.formCard {
-  margin: 0 16px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 16px;
-  display: flex; flex-direction: column; gap: 14px;
-}
-.formField { display: flex; flex-direction: column; gap: 7px; }
-.formField label { font-size: 12px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
-
-.input {
-  width: 100%; padding: 11px 14px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-sm);
-  color: var(--text); font-size: 14px; outline: none;
-}
-.input:focus { border-color: var(--accent); }
-
-.emojiGrid { display: flex; flex-wrap: wrap; gap: 6px; }
-.emojiBtn {
-  width: 36px; height: 36px; border-radius: 8px;
-  background: var(--surface2); border: 1.5px solid transparent;
-  font-size: 18px; transition: all 0.15s;
-  display: flex; align-items: center; justify-content: center;
-}
-.emojiBtn:active { transform: scale(0.9); }
-.emojiSel { border-color: var(--accent); background: rgba(124,109,250,0.15); }
-
-.colorRow { display: flex; flex-wrap: wrap; gap: 8px; }
-.colorDot {
-  width: 28px; height: 28px; border-radius: 50%;
-  border: 3px solid transparent; transition: all 0.15s;
-}
-.colorSel { border-color: white; transform: scale(1.15); }
-
-.formBtns { display: flex; gap: 8px; }
-.cancelBtn {
-  flex: 1; padding: 10px; border-radius: var(--r-sm);
-  background: var(--surface2); border: 1px solid var(--border2);
-  color: var(--text2); font-size: 14px; font-weight: 500;
-}
-.confirmBtn {
-  flex: 1; padding: 10px; border-radius: var(--r-sm);
-  background: var(--accent); border: none;
-  color: white; font-size: 14px; font-weight: 600;
-}
-.confirmBtn:active { opacity: 0.85; }
-
-/* Habit cards */
+/* Habit card */
 .manageCard {
   display: flex; align-items: center; gap: 14px;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 13px 14px;
+  border-radius: 16px; padding: 13px 14px;
   margin: 0 16px 8px;
 }
 .manageIcon {
@@ -94,59 +41,89 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 22px; flex-shrink: 0;
 }
-.manageName { flex: 1; }
-.manageHabitName   { font-size: 15px; font-weight: 500; color: var(--text); }
-.manageHabitLevel  { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.manageActions { display: flex; align-items: center; gap: 8px; }
+.manageName {
+  flex: 1; font-size: 14px; font-weight: 500; color: var(--text);
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 
+/* Pause button - clean inline pill */
 .archiveBtn {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text3); font-size: 14px;
-  display: flex; align-items: center; justify-content: center;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 14px; border-radius: 99px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 12px; font-weight: 600;
+  white-space: nowrap; flex-shrink: 0; line-height: 1.3;
 }
 .archiveBtn:active { opacity: 0.7; }
 
+/* Archived section */
 .archivedHeader {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 18px 10px; cursor: pointer;
+  padding: 16px 20px 10px; cursor: pointer;
 }
 .archivedCard { opacity: 0.6; }
-
 .restoreBtn {
-  padding: 6px 12px; border-radius: var(--r-sm);
-  background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3);
-  color: var(--green); font-size: 12px; font-weight: 600; white-space: nowrap;
+  padding: 7px 14px; border-radius: 99px;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: var(--green); font-size: 12px; font-weight: 600;
+  white-space: nowrap;
 }
+.restoreBtn:active { opacity: 0.8; }
+.emptyArchive { text-align: center; padding: 14px; font-size: 13px; color: var(--text3); }
 
+/* Add form */
+.formCard {
+  margin: 0 16px 16px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 18px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.formField { display: flex; flex-direction: column; gap: 6px; }
+.formField label { font-size: 12px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.input {
+  width: 100%; padding: 11px 13px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; color: var(--text); font-size: 14px; outline: none;
+}
+.input:focus { border-color: var(--accent); }
+.emojiGrid { display: flex; flex-wrap: wrap; gap: 8px; }
+.emojiBtn {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--surface2); border: 1.5px solid transparent;
+  font-size: 19px; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.emojiSel { border-color: var(--accent); background: rgba(108,99,255,0.15); }
+.colorRow { display: flex; flex-wrap: wrap; gap: 8px; }
+.colorDot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2.5px solid transparent; transition: all 0.15s;
+}
+.colorSel { border-color: white; transform: scale(1.15); }
+.formBtns { display: flex; gap: 8px; }
+.cancelBtn {
+  padding: 11px 18px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 14px;
+}
+.confirmBtn {
+  flex: 1; padding: 11px; border-radius: 10px;
+  background: var(--accent); border: none;
+  color: white; font-size: 14px; font-weight: 600;
+}
+.confirmBtn:active { opacity: 0.85; }
+
+/* Empty state */
 .emptyState {
   display: flex; flex-direction: column; align-items: center;
-  padding: 48px 20px; gap: 12px; text-align: center;
+  padding: 48px 20px; gap: 12px;
 }
 .emptyIcon { font-size: 48px; }
 .emptyText { font-size: 15px; color: var(--text2); }
 .seedBtn {
-  padding: 12px 24px; border-radius: var(--r-sm);
+  padding: 12px 24px; border-radius: 10px;
   background: var(--accent); border: none;
   color: white; font-size: 14px; font-weight: 600; margin-top: 8px;
 }
-
-.emptyArchive {
-  text-align: center; padding: 16px;
-  font-size: 13px; color: var(--text3);
-}
-
-/* Force single-line pause button */
-.archiveBtn {
-  padding: 6px 14px !important;
-  border-radius: 20px !important;
-  background: var(--surface2) !important;
-  border: 1px solid var(--border2) !important;
-  color: var(--text2) !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-  display: inline-block !important;
-  line-height: 1.4 !important;
-}
+.manageActions { display: flex; align-items: center; gap: 8px; }
