@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useSocialStore } from '../store/useSocialStore'
 import { supabase } from '../lib/supabase'
+import { registerPush, unregisterPush } from '../lib/push'
 import s from './SettingsPage.module.css'
 
 export default function SettingsPage() {
@@ -15,6 +16,7 @@ export default function SettingsPage() {
   const [loading, setLoading]     = useState(true)
   const [saving, setSaving]       = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [pushEnabled, setPushEnabled] = useState(Notification?.permission === 'granted')
   const [msg, setMsg]             = useState('')
   const [error, setError]         = useState('')
 
@@ -23,6 +25,16 @@ export default function SettingsPage() {
     supabase.from('profiles').select('name,username,bio,is_public,avatar_url').eq('id', user.id).single()
       .then(({ data }) => { if (data) setProfile(p => ({ ...p, ...data })); setLoading(false) })
   }, [user])
+
+  const togglePush = async () => {
+    if (pushEnabled) {
+      await unregisterPush(user.id)
+      setPushEnabled(false)
+    } else {
+      const result = await registerPush(user.id)
+      setPushEnabled(!!result)
+    }
+  }
 
   const save = async () => {
     setSaving(true); setMsg(''); setError('')
@@ -174,6 +186,20 @@ export default function SettingsPage() {
         <div className={s.infoRow}>
           <span className={s.infoLabel}>Profil-Link</span>
           <span className={s.infoVal} style={{ color:'var(--accent2)' }}>/profile/{profile.username}</span>
+        </div>
+      </div>
+
+      <div className={s.section}>
+        <div className={s.sectionLabel}>Push-Benachrichtigungen</div>
+        <div className={s.toggleRow}>
+          <div>
+            <div className={s.toggleLabel}>Erinnerungen aktivieren</div>
+            <div className={s.toggleSub}>Tägliche Habit-Erinnerung um 18 Uhr</div>
+          </div>
+          <label className={s.toggle}>
+            <input type="checkbox" checked={pushEnabled} onChange={togglePush} />
+            <span className={s.slider} />
+          </label>
         </div>
       </div>
 

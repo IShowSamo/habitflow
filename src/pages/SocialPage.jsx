@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useSocialStore } from '../store/useSocialStore'
+import { notifyFriendRequest } from '../lib/push'
 import s from './SocialPage.module.css'
 
 
@@ -45,9 +46,12 @@ export default function SocialPage() {
     return () => clearTimeout(t)
   }, [query])
 
-  const handleSend = async (toId) => {
+  const handleSend = async (toId, toUser) => {
     setSent(s => ({ ...s, [toId]: true }))
     await sendRequest(user.id, toId)
+    // Push notification to recipient
+    const fromName = user.user_metadata?.name || user.email?.split('@')[0] || 'Jemand'
+    await notifyFriendRequest(toId, fromName).catch(() => {})
   }
 
   return (
@@ -166,7 +170,7 @@ export default function SocialPage() {
                   {!isMe && (
                     isFriend   ? <div className={s.friendTag}>Freund ✓</div>
                     : wasSent  ? <div className={s.sentTag}>Gesendet</div>
-                    : <button className={s.addBtn} onClick={() => handleSend(u.id)}>+ Adden</button>
+                    : <button className={s.addBtn} onClick={() => handleSend(u.id, u)}>+ Adden</button>
                   )}
                 </div>
               )

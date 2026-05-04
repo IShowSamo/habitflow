@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useStore } from '../store/useStore'
 import { supabase } from '../lib/supabase'
+import { scheduleLocalNotif } from '../lib/push'
 import s from './HabitsPage.module.css'
 
 const EMOJIS = ['⭐','🏃','🧠','💊','🥗','😴','🧘','✍️','🎯','🚴','🙏','🌊','📖','🎵','💻','🌱','🦷','🧹','💸','❤️']
@@ -37,6 +38,13 @@ export default function HabitsPage() {
   const handleAdd = async () => {
     if (!form.name.trim()) return
     await addHabit(form)
+    if (form.notif_on && form.notif_time) {
+      const [h, m] = form.notif_time.split(':').map(Number)
+      const now = new Date(), next = new Date()
+      next.setHours(h, m, 0, 0)
+      if (next <= now) next.setDate(next.getDate() + 1)
+      scheduleLocalNotif('HabitFlow 🌿', `Zeit für: ${form.icon} ${form.name}`, next - now)
+    }
     setForm({ name:'', icon:'⭐', color:'#6c63ff', notif_time:'08:00', notif_on:true })
     setShowForm(false)
   }
