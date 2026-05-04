@@ -7,41 +7,47 @@ import AppShell from './pages/AppShell'
 
 export default function App() {
   const { user, setUser } = useStore()
-  const [checking, setChecking] = useState(true)
+  // null = still checking, false = not logged in, object = logged in
+  const [authState, setAuthState] = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null)
-      setChecking(false)
+      const u = data.session?.user ?? false
+      setUser(u || null)
+      setAuthState(u)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null)
+      const u = session?.user ?? false
+      setUser(u || null)
+      setAuthState(u)
     })
     return () => subscription.unsubscribe()
   }, [])
 
-  if (checking) return (
+  // Still checking session - show nothing (transparent, not black)
+  if (authState === null) return (
     <div style={{
-      height:'100vh', display:'flex', flexDirection:'column',
-      alignItems:'center', justifyContent:'center',
-      background:'var(--bg)', gap:16
+      height: '100vh',
+      background: 'var(--bg)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 16,
     }}>
-      <div style={{ fontSize:42 }}>🌿</div>
-      <svg width="32" height="32" viewBox="0 0 32 32" style={{ animation:'spin 0.8s linear infinite' }}>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        <circle cx="16" cy="16" r="12" fill="none" stroke="#1a1a26" strokeWidth="3"/>
-        <circle cx="16" cy="16" r="12" fill="none" stroke="#6c63ff" strokeWidth="3"
-          strokeDasharray="44 32" strokeLinecap="round"/>
-      </svg>
+      <div style={{ fontSize: 48 }}>🌿</div>
+      <p style={{ color: 'var(--text2)', fontSize: 14, fontWeight: 500 }}>HabitFlow</p>
     </div>
   )
 
-  if (!user) return (
+  // Not logged in
+  if (authState === false) return (
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
-      <Route path="/*"   element={<Navigate to="/auth" />} />
+      <Route path="/*" element={<Navigate to="/auth" replace />} />
     </Routes>
   )
 
+  // Logged in
   return <AppShell />
 }

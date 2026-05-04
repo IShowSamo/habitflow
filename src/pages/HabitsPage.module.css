@@ -95,7 +95,7 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 22px; flex-shrink: 0;
 }
-.manageName { flex: 1; }
+.manageName { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .manageHabitName   { font-size: 15px; font-weight: 500; color: var(--text); }
 .manageHabitLevel  { font-size: 11px; color: var(--text2); margin-top: 2px; }
 .manageActions { display: flex; align-items: center; gap: 8px; }
