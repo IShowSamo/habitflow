@@ -160,10 +160,17 @@ export default function ProfilePage() {
         <div className={s.cardTitle}>Erfolgsquote diesen Monat</div>
         {habits.map((h, i) => {
           const now = new Date()
-          const from = format(new Date(now.getFullYear(), now.getMonth(), 1), 'yyyy-MM-dd')
-          const days = Object.keys(logs).filter(d => d >= from)
-          const done = days.filter(d => logs[d]?.[h.id]).length
-          const pct  = days.length ? done / days.length : 0
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+          // Count ALL days from month start to today
+          const totalDays = Math.floor((now - monthStart) / 86400000) + 1
+          let doneDays = 0
+          for (let d = 0; d < totalDays; d++) {
+            const dd = new Date(monthStart)
+            dd.setDate(dd.getDate() + d)
+            const k = dd.toISOString().slice(0,10)
+            if (logs[k]?.[h.id]) doneDays++
+          }
+          const pct = totalDays > 0 ? doneDays / totalDays : 0
           return (
             <div key={h.id} className={s.barRow}>
               <span className={s.barIcon}>{h.icon}</span>

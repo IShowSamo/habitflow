@@ -97,7 +97,7 @@ export default function SocialPage() {
       {tab === 'Leaderboard' && (
         <div className={s.section}>
           <div className={s.lbHeader}>
-            <span>Spieler</span><span>Heute</span><span>7 Tage</span>
+            <span>Spieler</span><span>Heute ✓</span><span>7 Tage</span>
           </div>
           {leaderboard.map((entry, i) => {
             const isMe = entry.user_id === user?.id

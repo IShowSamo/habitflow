@@ -137,16 +137,17 @@ export const useSocialStore = create((set, get) => ({
     const todayDone = (habits || []).filter(h => logs[todayKey]?.[h.id]).length
     const todayPct  = habits?.length ? todayDone / habits.length : 0
 
-    // Month pct – count ALL days from month start to today (not just logged days)
+    // Month pct – count ALL days from month start to today
     const now2 = new Date()
     const mStart = startOfMonth(now2)
     const allMonthDays = eachDayOfInterval({ start: mStart, end: now2 })
-    const monthChecks = allMonthDays.reduce((a, d) => {
+    let monthChecks = 0
+    allMonthDays.forEach(d => {
       const k = format(d, 'yyyy-MM-dd')
-      return a + (habits || []).filter(h => logs[k]?.[h.id]).length
-    }, 0)
-    const monthPossible = allMonthDays.length * (habits?.length || 1)
-    const monthPct = monthPossible ? monthChecks / monthPossible : 0
+      ;(habits || []).forEach(h => { if (logs[k]?.[h.id]) monthChecks++ })
+    })
+    const monthPossible = allMonthDays.length * Math.max((habits || []).length, 1)
+    const monthPct = monthPossible > 0 ? monthChecks / monthPossible : 0
 
     set({ viewedProfile: { profile, habits: habits || [], logs, streaks, todayPct, monthPct }, loading: false })
   },
