@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { format, subDays, addDays, isToday, isFuture } from 'date-fns'
+import { format, subDays, isToday, isFuture } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
@@ -21,20 +21,6 @@ export default function TodayPage() {
   const R = 44
   const circ = 2 * Math.PI * R
   const dash = circ * pct
-
-  const goToPrevDay = async () => {
-    const prev = subDays(selectedDate, 1)
-    setSelectedDate(prev)
-    const k = format(prev, 'yyyy-MM-dd')
-    await fetchLogs(k, k)
-  }
-
-  const goToNextDay = () => {
-    if (!isFutureDay) {
-      const next = addDays(selectedDate, 1)
-      setSelectedDate(next)
-    }
-  }
 
   const goToToday = () => setSelectedDate(new Date())
 
@@ -59,20 +45,16 @@ export default function TodayPage() {
         </button>
       </div>
 
-      {/* Day navigator */}
+      {/* Day chips - swipeable, no arrow buttons */}
       <div className={s.dayNav}>
-        <button className={s.dayNavBtn} onClick={goToPrevDay}>‹</button>
-        <div className={s.dayPicker}>
-          {last7.map(d => (
-            <button key={d.key}
-              className={`${s.dayChip} ${d.key === dateKey ? s.dayChipActive : ''} ${isToday(d.date) ? s.dayChipToday : ''}`}
-              onClick={() => { setSelectedDate(d.date); fetchLogs(d.key, d.key) }}>
-              <span className={s.dayChipLabel}>{d.label}</span>
-              <span className={s.dayChipNum}>{d.num}</span>
-            </button>
-          ))}
-        </div>
-        <button className={s.dayNavBtn} onClick={goToNextDay} disabled={isCurrentDay} style={{ opacity: isCurrentDay ? 0.3 : 1 }}>›</button>
+        {last7.map(d => (
+          <button key={d.key}
+            className={`${s.dayChip} ${d.key === dateKey ? s.dayChipActive : ''} ${isToday(d.date) ? s.dayChipToday : ''}`}
+            onClick={() => { setSelectedDate(d.date); fetchLogs(d.key, d.key) }}>
+            <span className={s.dayChipLabel}>{d.label}</span>
+            <span className={s.dayChipNum}>{d.num}</span>
+          </button>
+        ))}
       </div>
 
       {!isCurrentDay && (
