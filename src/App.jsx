@@ -14,28 +14,27 @@ export default function App() {
   const [tutorialDone, setTutorialDone] = useState(false)
 
   useEffect(() => {
+    // Check for existing session on load (persisted automatically by Supabase)
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user ?? null
       setUser(u)
-      if (u) {
-        // Tutorial is per-user-id, stored in Supabase user metadata
-        const meta = u.user_metadata || {}
-        setOnboarded(!!meta.onboarded)
-        setTutorialDone(!!meta.tutorial_done)
-      }
+      if (u) loadUserMeta(u)
       setChecking(false)
     })
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       const u = session?.user ?? null
       setUser(u)
-      if (u) {
-        const meta = u.user_metadata || {}
-        setOnboarded(!!meta.onboarded)
-        setTutorialDone(!!meta.tutorial_done)
-      }
+      if (u) loadUserMeta(u)
     })
     return () => subscription.unsubscribe()
   }, [])
+
+  const loadUserMeta = (u) => {
+    const meta = u.user_metadata || {}
+    setOnboarded(!!meta.onboarded)
+    setTutorialDone(!!meta.tutorial_done)
+  }
 
   const handleOnboardingFinish = async () => {
     await supabase.auth.updateUser({ data: { onboarded: true } })
@@ -47,9 +46,16 @@ export default function App() {
     setTutorialDone(true)
   }
 
+  // Show spinner while checking session
   if (checking) return (
-    <div style={{ height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg)' }}>
+    <div style={{
+      height: '100vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      background: 'var(--bg)', gap: 16
+    }}>
+      <div style={{ fontSize: 36 }}>🌿</div>
       <Spinner />
+      <p style={{ color: 'var(--text2)', fontSize: 13 }}>HabitFlow wird geladen...</p>
     </div>
   )
 
@@ -63,7 +69,7 @@ export default function App() {
   if (!onboarded) return <Onboarding onFinish={handleOnboardingFinish} />
 
   return (
-    <div style={{ height:'100%', position:'relative' }}>
+    <div style={{ height: '100%', position: 'relative' }}>
       <AppShell />
       {!tutorialDone && <Tutorial onFinish={handleTutorialFinish} />}
     </div>
@@ -72,11 +78,12 @@ export default function App() {
 
 function Spinner() {
   return (
-    <svg width="40" height="40" viewBox="0 0 40 40" style={{ animation:'spin 0.8s linear infinite' }}>
+    <svg width="36" height="36" viewBox="0 0 36 36"
+      style={{ animation: 'spin 0.8s linear infinite' }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <circle cx="20" cy="20" r="16" fill="none" stroke="var(--surface2)" strokeWidth="3" />
-      <circle cx="20" cy="20" r="16" fill="none" stroke="var(--accent)"   strokeWidth="3"
-        strokeDasharray="60 44" strokeLinecap="round" />
+      <circle cx="18" cy="18" r="14" fill="none" stroke="var(--surface2)" strokeWidth="3" />
+      <circle cx="18" cy="18" r="14" fill="none" stroke="var(--accent)" strokeWidth="3"
+        strokeDasharray="52 36" strokeLinecap="round" />
     </svg>
   )
 }

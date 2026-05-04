@@ -128,11 +128,9 @@ export default function HabitsPage() {
             <div key={h.id} className={s.manageCard}>
               <div className={s.manageIcon} style={{ background: h.color + '22' }}>{h.icon}</div>
               <div className={s.manageName}>{h.name}</div>
-              <div className={s.manageActions}>
-                <button className={s.archiveBtn} onClick={() => archiveHabit(h.id)}>
-                  Deaktivieren
-                </button>
-              </div>
+              <button className={s.archiveBtn} onClick={() => archiveHabit(h.id)}>
+                ⏸ Pause
+              </button>
             </div>
           ))}
         </>

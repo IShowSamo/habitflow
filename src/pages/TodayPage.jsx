@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { format, subDays, addDays, isToday, isFuture } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useNavigate } from 'react-router-dom'
@@ -13,7 +13,6 @@ const QUOTES = [
   { text: "Erfolg ist die Summe kleiner Anstrengungen, die jeden Tag wiederholt werden.", author: "Robert Collier" },
   { text: "Die einzige schlechte Einheit ist die, die du ausgelassen hast.", author: "" },
   { text: "Du bist einen Tag näher an der Version von dir, die du dir vorstellst.", author: "" },
-  { text: "Wer aufhört, besser zu werden, hat aufgehört, gut zu sein.", author: "" },
   { text: "Motivation bringt dich in Gang. Gewohnheit hält dich am Laufen.", author: "Jim Ryun" },
   { text: "Der beste Zeitpunkt war gestern. Der zweitbeste ist jetzt.", author: "" },
   { text: "Stark sein ist nie einfach. Aber es lohnt sich immer.", author: "" },
@@ -21,43 +20,8 @@ const QUOTES = [
 ]
 
 function getDailyQuote() {
-  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000)
-  return QUOTES[dayOfYear % QUOTES.length]
-}
-
-function schedulePushReminder(habits, logs) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return
-  const todayKey = format(new Date(), 'yyyy-MM-dd')
-  const doneCount = habits.filter(h => logs[todayKey]?.[h.id]).length
-  const total = habits.length
-  if (doneCount === total || total === 0) return
-
-  // Schedule at 18:00 if not all done
-  const now = new Date()
-  const reminder = new Date()
-  reminder.setHours(18, 0, 0, 0)
-  if (reminder <= now) reminder.setDate(reminder.getDate() + 1)
-
-  const ms = reminder - now
-  const streakMotivations = [
-    "🔥 Brich deinen Streak nicht! Du hast heute noch Habits offen.",
-    "💪 Fast da! Noch ein paar Habits für heute.",
-    "⚡ Dein zukünftiges Ich zählt auf dich – tracke jetzt!",
-    "🎯 Der Tag ist noch nicht rum. Hol dir deinen 100%!",
-  ]
-  const msg = streakMotivations[Math.floor(Math.random() * streakMotivations.length)]
-
-  setTimeout(() => {
-    new Notification('HabitFlow 🌿', { body: msg, icon: '/icon-192.png' })
-  }, ms)
-}
-
-async function requestAndSchedule(habits, logs) {
-  if (!('Notification' in window)) return
-  if (Notification.permission === 'default') {
-    await Notification.requestPermission()
-  }
-  schedulePushReminder(habits, logs)
+  const day = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000)
+  return QUOTES[day % QUOTES.length]
 }
 
 export default function TodayPage() {
@@ -65,8 +29,6 @@ export default function TodayPage() {
   const nav = useNavigate()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [streakMsg, setStreakMsg] = useState(null)
-  const touchStartX = useRef(null)
-  const touchStartY = useRef(null)
 
   const dateKey      = format(selectedDate, 'yyyy-MM-dd')
   const isCurrentDay = isToday(selectedDate)
@@ -74,52 +36,31 @@ export default function TodayPage() {
   const done  = getDoneCount(dateKey)
   const total = habits.length
   const pct   = total ? done / total : 0
-
   const quote = getDailyQuote()
+  const R = 44, circ = 2 * Math.PI * R, dash = circ * pct
 
-  // Check streak once habits are loaded
   useEffect(() => {
     if (!habits.length) return
-
     const bestStreak = Math.max(...habits.map(h => getStreak(h.id)), 0)
-    const todayKey2  = format(new Date(), 'yyyy-MM-dd')
-    const todayDone  = getDoneCount(todayKey2)
-    // Only show banner if real streak >= 2 and nothing tracked today yet
+    const todayDone  = getDoneCount(format(new Date(), 'yyyy-MM-dd'))
     if (bestStreak >= 2 && todayDone === 0) {
-      if (bestStreak >= 7) {
-        setStreakMsg(`🏆 ${bestStreak} Tage Streak! Lass ihn nicht reißen.`)
-      } else {
-        setStreakMsg(`🔥 ${bestStreak}-Tage Streak! Tracke heute um ihn zu halten.`)
-      }
+      setStreakMsg(bestStreak >= 7
+        ? `🏆 ${bestStreak} Tage Streak! Lass ihn nicht reißen.`
+        : `🔥 ${bestStreak}-Tage Streak! Tracke heute um ihn zu halten.`)
     }
-    requestAndSchedule(habits, logs)
   }, [habits.length])
 
-  const goToToday = () => setSelectedDate(new Date())
-
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX
-    touchStartY.current = e.touches[0].clientY
+  const goPrev = async () => {
+    const prev = subDays(selectedDate, 1)
+    setSelectedDate(prev)
+    await fetchLogs(format(prev, 'yyyy-MM-dd'), format(prev, 'yyyy-MM-dd'))
   }
-  const handleTouchEnd = async (e) => {
-    if (touchStartX.current === null) return
-    const dx = e.changedTouches[0].clientX - touchStartX.current
-    const dy = e.changedTouches[0].clientY - touchStartY.current
-    touchStartX.current = null
-    touchStartY.current = null
-    // Only trigger if horizontal swipe is dominant (not a scroll)
-    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * 0.8) return
-    if (dx < 0 && !isCurrentDay) {
-      // swipe left = newer day
-      const next = addDays(selectedDate, 1)
-      setSelectedDate(next)
-      await fetchLogs(format(next, 'yyyy-MM-dd'), format(next, 'yyyy-MM-dd'))
-    } else if (dx > 0) {
-      // swipe right = older day
-      const prev = subDays(selectedDate, 1)
-      setSelectedDate(prev)
-      await fetchLogs(format(prev, 'yyyy-MM-dd'), format(prev, 'yyyy-MM-dd'))
-    }
+
+  const goNext = async () => {
+    if (isCurrentDay) return
+    const next = addDays(selectedDate, 1)
+    setSelectedDate(next)
+    await fetchLogs(format(next, 'yyyy-MM-dd'), format(next, 'yyyy-MM-dd'))
   }
 
   const last7 = Array.from({ length: 7 }, (_, i) => {
@@ -127,10 +68,8 @@ export default function TodayPage() {
     return { date: d, key: format(d, 'yyyy-MM-dd'), label: format(d, 'EEE', { locale: de }), num: d.getDate() }
   })
 
-  const R = 44, circ = 2 * Math.PI * R, dash = circ * pct
-
   return (
-    <div className={s.page} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div className={s.page}>
 
       {/* Header */}
       <div className={s.header}>
@@ -143,7 +82,7 @@ export default function TodayPage() {
         </button>
       </div>
 
-      {/* Streak login reminder */}
+      {/* Streak banner */}
       {streakMsg && isCurrentDay && (
         <div className={s.streakBanner} onClick={() => setStreakMsg(null)}>
           <span>{streakMsg}</span>
@@ -151,7 +90,7 @@ export default function TodayPage() {
         </div>
       )}
 
-      {/* Motivational quote */}
+      {/* Quote */}
       {isCurrentDay && (
         <div className={s.quoteCard}>
           <div className={s.quoteIcon}>💬</div>
@@ -162,20 +101,27 @@ export default function TodayPage() {
         </div>
       )}
 
-      {/* Day chips */}
-      <div className={s.dayNav}>
-        {last7.map(d => (
-          <button key={d.key}
-            className={`${s.dayChip} ${d.key === dateKey ? s.dayChipActive : ''} ${isToday(d.date) ? s.dayChipToday : ''}`}
-            onClick={() => { setSelectedDate(d.date); fetchLogs(d.key, d.key) }}>
-            <span className={s.dayChipLabel}>{d.label}</span>
-            <span className={s.dayChipNum}>{d.num}</span>
-          </button>
-        ))}
+      {/* Day navigator with arrows */}
+      <div className={s.dayNavRow}>
+        <button className={s.dayArrow} onClick={goPrev}>‹</button>
+        <div className={s.dayNav}>
+          {last7.map(d => (
+            <button key={d.key}
+              className={`${s.dayChip} ${d.key === dateKey ? s.dayChipActive : ''} ${isToday(d.date) ? s.dayChipToday : ''}`}
+              onClick={() => { setSelectedDate(d.date); fetchLogs(d.key, d.key) }}>
+              <span className={s.dayChipLabel}>{d.label}</span>
+              <span className={s.dayChipNum}>{d.num}</span>
+            </button>
+          ))}
+        </div>
+        <button className={s.dayArrow} onClick={goNext} disabled={isCurrentDay}
+          style={{ opacity: isCurrentDay ? 0.25 : 1 }}>›</button>
       </div>
 
       {!isCurrentDay && (
-        <button className={s.backToToday} onClick={goToToday}>↩ Zurück zu heute</button>
+        <button className={s.backToToday} onClick={() => setSelectedDate(new Date())}>
+          ↩ Zurück zu heute
+        </button>
       )}
 
       {/* Progress ring */}
@@ -199,7 +145,7 @@ export default function TodayPage() {
             <div className={s.ringMood}>
               {isFutureDay ? '🔮 Zukunft'
                : done === total && total > 0 ? '🔥 Perfekter Tag!'
-               : done === 0 ? (isCurrentDay ? 'Los geht\'s!' : '😔 Nichts erledigt')
+               : done === 0 ? (isCurrentDay ? "Los geht's!" : '😔 Nichts erledigt')
                : 'Weiter so! 💪'}
             </div>
           </div>
@@ -218,7 +164,7 @@ export default function TodayPage() {
             <button key={h.id}
               className={`${s.habitCard} ${checked ? s.done : ''}`}
               onClick={() => !isFutureDay && toggleHabit(h.id, dateKey)}
-              style={{ opacity: isFutureDay ? 0.4 : 1, cursor: isFutureDay ? 'default' : 'pointer' }}>
+              disabled={isFutureDay}>
               <div className={s.habitIcon} style={{ background: h.color + '22' }}>{h.icon}</div>
               <div className={s.habitInfo}>
                 <div className={s.habitName}>{h.name}</div>

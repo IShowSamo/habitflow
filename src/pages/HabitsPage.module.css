@@ -99,6 +99,7 @@
 .manageHabitName   { font-size: 15px; font-weight: 500; color: var(--text); }
 .manageHabitLevel  { font-size: 11px; color: var(--text2); margin-top: 2px; }
 .manageActions { display: flex; align-items: center; gap: 8px; }
+/* inline archive button */
 
 .archiveBtn {
   width: 32px; height: 32px; border-radius: 8px;
