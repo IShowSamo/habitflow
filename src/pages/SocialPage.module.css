@@ -144,3 +144,8 @@
 .emptyIcon { font-size: 40px; }
 .emptyTitle { font-size: 15px; font-weight: 600; color: var(--text); }
 .emptyText  { font-size: 13px; color: var(--text2); }
+
+.lbLevel {
+  min-width: 80px; text-align: right;
+  font-size: 12px; font-weight: 600; color: var(--accent2);
+}

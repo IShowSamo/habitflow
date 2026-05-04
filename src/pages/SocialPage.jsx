@@ -4,6 +4,20 @@ import { useStore } from '../store/useStore'
 import { useSocialStore } from '../store/useSocialStore'
 import s from './SocialPage.module.css'
 
+
+const LEVELS = [
+  { lvl: 1, name: 'Beginner',   icon: '🌱', days: 0   },
+  { lvl: 2, name: 'Consistent', icon: '💪', days: 7   },
+  { lvl: 3, name: 'Warrior',    icon: '⚔️', days: 21  },
+  { lvl: 4, name: 'Champion',   icon: '🏆', days: 50  },
+  { lvl: 5, name: 'Legend',     icon: '🔥', days: 100 },
+]
+function getLevel(streak) {
+  let l = LEVELS[0]
+  for (const x of LEVELS) { if (streak >= x.days) l = x }
+  return l
+}
+
 const TABS = ['Friends', 'Leaderboard', 'Suchen']
 
 export default function SocialPage() {
@@ -95,7 +109,7 @@ export default function SocialPage() {
           <div className={s.lbHeader}>
             <span className={s.lbHeaderLabel} style={{ flex:1, marginLeft: 82 }}>Spieler</span>
             <span className={s.lbHeaderLabel} style={{ width:52, textAlign:'center' }}>Heute ✓</span>
-            <span className={s.lbHeaderLabel} style={{ width:52, textAlign:'center' }}>🔥 Streak</span>
+            <span className={s.lbHeaderLabel} style={{ width:60, textAlign:'center' }}>Level</span>
           </div>
           {leaderboard.map((entry, i) => {
             const isMe = entry.user_id === user?.id
@@ -114,8 +128,8 @@ export default function SocialPage() {
                 <div className={s.lbToday}>
                   {entry.today_checks}<span>/{entry.total_habits}</span>
                 </div>
-                <div className={s.lbStreak}>
-                  {entry.streak_days > 0 ? entry.streak_days : '-'}
+                <div className={s.lbLevel}>
+                  {(() => { const l = getLevel(entry.streak_days || 0); return <span title={l.name + ' · ' + (entry.streak_days||0) + ' Tage'}>{l.icon} {l.name}</span> })()}
                 </div>
               </div>
             )
