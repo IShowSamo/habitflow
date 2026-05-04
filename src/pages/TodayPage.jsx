@@ -51,20 +51,27 @@ export default function TodayPage() {
   }, [habits.length])
 
   const goPrev = async () => {
-    const prev = subDays(selectedDate, 1)
+    const prev = subDays(selectedDate, 7)
     setSelectedDate(prev)
-    await fetchLogs(format(prev, 'yyyy-MM-dd'), format(prev, 'yyyy-MM-dd'))
+    const from = format(subDays(prev, 6), 'yyyy-MM-dd')
+    const to   = format(prev, 'yyyy-MM-dd')
+    await fetchLogs(from, to)
   }
 
   const goNext = async () => {
     if (isCurrentDay) return
-    const next = addDays(selectedDate, 1)
-    setSelectedDate(next)
-    await fetchLogs(format(next, 'yyyy-MM-dd'), format(next, 'yyyy-MM-dd'))
+    const next = addDays(selectedDate, 7)
+    const capped = new Date(Math.min(next, new Date()))
+    setSelectedDate(capped)
+    const from = format(subDays(capped, 6), 'yyyy-MM-dd')
+    const to   = format(capped, 'yyyy-MM-dd')
+    await fetchLogs(from, to)
   }
 
+  // Show 7 days centered around selectedDate
+  const weekAnchor = isCurrentDay ? new Date() : selectedDate
   const last7 = Array.from({ length: 7 }, (_, i) => {
-    const d = subDays(new Date(), 6 - i)
+    const d = subDays(weekAnchor, 6 - i)
     return { date: d, key: format(d, 'yyyy-MM-dd'), label: format(d, 'EEE', { locale: de }), num: d.getDate() }
   })
 

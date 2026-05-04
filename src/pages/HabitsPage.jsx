@@ -129,7 +129,7 @@ export default function HabitsPage() {
               <div className={s.manageIcon} style={{ background: h.color + '22' }}>{h.icon}</div>
               <div className={s.manageName}>{h.name}</div>
               <button className={s.archiveBtn} onClick={() => archiveHabit(h.id)}>
-                ⏸ Pause
+                ⏸ Deaktivieren
               </button>
             </div>
           ))}
