@@ -14,9 +14,9 @@ export default function SocialPage() {
     searchUsers, sendRequest, acceptRequest, removeConnection,
   } = useSocialStore()
 
-  const [tab, setTab]   = useState('Friends')
+  const [tab, setTab]     = useState('Friends')
   const [query, setQuery] = useState('')
-  const [sent, setSent]   = useState({})   // { userId: true } optimistic
+  const [sent, setSent]   = useState({})
   const nav = useNavigate()
 
   useEffect(() => {
@@ -36,15 +36,11 @@ export default function SocialPage() {
     await sendRequest(user.id, toId)
   }
 
-  const initials = (name) => (name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
-
   return (
     <div className={s.page}>
       <div className={s.header}>
         <h1 className={s.title}>Community</h1>
-        {requests.length > 0 && (
-          <div className={s.badge}>{requests.length}</div>
-        )}
+        {requests.length > 0 && <div className={s.badge}>{requests.length}</div>}
       </div>
 
       {/* Incoming requests */}
@@ -74,11 +70,11 @@ export default function SocialPage() {
         ))}
       </div>
 
-      {/* Friends tab */}
+      {/* Friends */}
       {tab === 'Friends' && (
         <div className={s.section}>
           {friends.length === 0
-            ? <div className={s.empty}><span>👥</span><p>Noch keine Freunde. Suche nach Usernamen!</p></div>
+            ? <div className={s.empty}><span>👥</span><p>Noch keine Freunde.<br/>Suche nach Usernamen!</p></div>
             : friends.map(f => (
               <div key={f.id} className={s.friendCard} onClick={() => nav(`/profile/${f.username}`)}>
                 <Avatar name={f.name || f.username} url={f.avatar_url} />
@@ -93,11 +89,13 @@ export default function SocialPage() {
         </div>
       )}
 
-      {/* Leaderboard tab */}
+      {/* Leaderboard */}
       {tab === 'Leaderboard' && (
         <div className={s.section}>
           <div className={s.lbHeader}>
-            <span>Spieler</span><span>Heute ✓</span><span>🔥 Woche</span>
+            <span className={s.lbHeaderLabel} style={{ flex:1, marginLeft: 82 }}>Spieler</span>
+            <span className={s.lbHeaderLabel} style={{ width:52, textAlign:'center' }}>Heute ✓</span>
+            <span className={s.lbHeaderLabel} style={{ width:52, textAlign:'center' }}>🔥 Streak</span>
           </div>
           {leaderboard.map((entry, i) => {
             const isMe = entry.user_id === user?.id
@@ -108,32 +106,31 @@ export default function SocialPage() {
                 <div className={s.lbRank}>
                   {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`}
                 </div>
-                <Avatar name={entry.name || entry.username} url={entry.avatar_url} size={34} />
+                <Avatar name={entry.name || entry.username} url={entry.avatar_url} size={36} />
                 <div className={s.cardInfo}>
                   <div className={s.cardName}>{isMe ? 'Du' : (entry.name || entry.username)}</div>
                   <div className={s.cardSub}>@{entry.username}</div>
                 </div>
-                <div className={s.lbToday}>{entry.today_checks}<span>/{entry.total_habits}</span></div>
-                <div className={s.lbWeek}>{entry.week_checks}</div>
+                <div className={s.lbToday}>
+                  {entry.today_checks}<span>/{entry.total_habits}</span>
+                </div>
+                <div className={s.lbStreak}>
+                  {entry.streak_days > 0 ? entry.streak_days : '-'}
+                </div>
               </div>
             )
           })}
         </div>
       )}
 
-      {/* Search tab */}
+      {/* Search */}
       {tab === 'Suchen' && (
         <div className={s.section}>
-          <input
-            className={s.searchInput}
-            placeholder="Username suchen..."
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            autoFocus
-          />
+          <input className={s.searchInput} placeholder="Username suchen..."
+            value={query} onChange={e => setQuery(e.target.value)} autoFocus />
           {searchResults.length > 0 && query.length >= 2 && (
             searchResults.map(u => {
-              const isMe = u.id === user?.id
+              const isMe     = u.id === user?.id
               const isFriend = friends.some(f => f.id === u.id)
               const wasSent  = sent[u.id]
               return (
@@ -144,11 +141,9 @@ export default function SocialPage() {
                     <div className={s.cardSub}>@{u.username}</div>
                   </div>
                   {!isMe && (
-                    isFriend
-                      ? <div className={s.friendTag}>Freund ✓</div>
-                      : wasSent
-                        ? <div className={s.sentTag}>Gesendet</div>
-                        : <button className={s.addBtn} onClick={() => handleSend(u.id)}>+ Adden</button>
+                    isFriend   ? <div className={s.friendTag}>Freund ✓</div>
+                    : wasSent  ? <div className={s.sentTag}>Gesendet</div>
+                    : <button className={s.addBtn} onClick={() => handleSend(u.id)}>+ Adden</button>
                   )}
                 </div>
               )
@@ -172,7 +167,7 @@ export function Avatar({ name, url, size = 40 }) {
       width:size, height:size, borderRadius:'50%', flexShrink:0,
       background:`hsl(${hue},55%,38%)`,
       display:'flex', alignItems:'center', justifyContent:'center',
-      fontSize: size * 0.35, fontWeight:700, color:'white',
+      fontSize: size*0.35, fontWeight:700, color:'white',
     }}>{initials}</div>
   )
 }

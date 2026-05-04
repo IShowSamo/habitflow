@@ -79,7 +79,10 @@ export const useSocialStore = create((set, get) => ({
   fetchLeaderboard: async () => {
     const { data } = await supabase.from('leaderboard').select('*')
     if (!data) return
-    const sorted = [...data].sort((a, b) => b.week_checks - a.week_checks)
+    // Sort by streak days desc, then today_checks
+    const sorted = [...data].sort((a, b) =>
+      b.streak_days - a.streak_days || b.today_checks - a.today_checks
+    )
     set({ leaderboard: sorted })
   },
 

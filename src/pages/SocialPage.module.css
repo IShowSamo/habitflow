@@ -202,3 +202,11 @@
 .lbHeader span:first-child { flex: 1; margin-left: 78px; }
 .lbHeader span:nth-child(2) { min-width: 48px; text-align: center; }
 .lbHeader span:nth-child(3) { min-width: 40px; text-align: center; }
+
+.lbStreak {
+  width: 52px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+}
