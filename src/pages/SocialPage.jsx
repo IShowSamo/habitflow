@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useSocialStore } from '../store/useSocialStore'
-import { notifyFriendRequest } from '../lib/push'
 import s from './SocialPage.module.css'
 
+const TABS = ['Friends', 'Leaderboard', 'Suchen']
 
 const LEVELS = [
-  { lvl: 1, name: 'Beginner',   icon: '🌱', days: 0   },
-  { lvl: 2, name: 'Consistent', icon: '💪', days: 7   },
-  { lvl: 3, name: 'Warrior',    icon: '⚔️', days: 21  },
-  { lvl: 4, name: 'Champion',   icon: '🏆', days: 50  },
-  { lvl: 5, name: 'Legend',     icon: '🔥', days: 100 },
+  { lvl:1, name:'Beginner',   icon:'🌱', days:0   },
+  { lvl:2, name:'Consistent', icon:'💪', days:7   },
+  { lvl:3, name:'Warrior',    icon:'⚔️', days:21  },
+  { lvl:4, name:'Champion',   icon:'🏆', days:50  },
+  { lvl:5, name:'Legend',     icon:'🔥', days:100 },
 ]
 function getLevel(streak) {
   let l = LEVELS[0]
@@ -19,19 +19,18 @@ function getLevel(streak) {
   return l
 }
 
-const TABS = ['Friends', 'Leaderboard', 'Suchen']
-
 export default function SocialPage() {
   const { user } = useStore()
   const {
-    friends, requests, leaderboard, searchResults,
-    fetchFriends, fetchRequests, fetchLeaderboard,
+    friends, requests, leaderboard, searchResults, inAppNotifs,
+    fetchFriends, fetchRequests, fetchLeaderboard, fetchInAppNotifs, markNotifsRead,
     searchUsers, sendRequest, acceptRequest, removeConnection,
   } = useSocialStore()
 
-  const [tab, setTab]     = useState('Friends')
-  const [query, setQuery] = useState('')
-  const [sent, setSent]   = useState({})
+  const [tab, setTab]       = useState('Friends')
+  const [query, setQuery]   = useState('')
+  const [sent, setSent]     = useState({})
+  const [showNotifs, setShowNotifs] = useState(false)
   const nav = useNavigate()
 
   useEffect(() => {
@@ -39,6 +38,7 @@ export default function SocialPage() {
     fetchFriends(user.id)
     fetchRequests(user.id)
     fetchLeaderboard()
+    fetchInAppNotifs(user.id)
   }, [user])
 
   useEffect(() => {
@@ -46,25 +46,55 @@ export default function SocialPage() {
     return () => clearTimeout(t)
   }, [query])
 
-  const handleSend = async (toId, toUser) => {
+  const handleSend = async (toId) => {
     setSent(s => ({ ...s, [toId]: true }))
     await sendRequest(user.id, toId)
-    // Push notification to recipient
-    const fromName = user.user_metadata?.name || user.email?.split('@')[0] || 'Jemand'
-    await notifyFriendRequest(toId, fromName).catch(() => {})
   }
+
+  const unreadCount = inAppNotifs.filter(n => !n.read).length
+  const pendingSent = [] // could track sent requests
 
   return (
     <div className={s.page}>
+
+      {/* Header */}
       <div className={s.header}>
         <h1 className={s.title}>Community</h1>
-        {requests.length > 0 && <div className={s.badge}>{requests.length}</div>}
+        <button className={s.notifBtn} onClick={() => {
+          setShowNotifs(v => !v)
+          if (!showNotifs && unreadCount > 0) markNotifsRead(user.id)
+        }}>
+          🔔
+          {unreadCount > 0 && <span className={s.notifDot}>{unreadCount}</span>}
+        </button>
       </div>
+
+      {/* Notification dropdown */}
+      {showNotifs && (
+        <div className={s.notifPanel}>
+          <div className={s.notifPanelTitle}>Benachrichtigungen</div>
+          {inAppNotifs.length === 0
+            ? <div className={s.notifEmpty}>Keine Benachrichtigungen</div>
+            : inAppNotifs.map(n => (
+              <div key={n.id} className={`${s.notifItem} ${!n.read ? s.notifUnread : ''}`}>
+                <Avatar name={n.from_name || '?'} url={n.from_avatar} size={32} />
+                <div className={s.notifText}>
+                  {n.type === 'friend_request'
+                    ? <><b>{n.from_name}</b> hat dir eine Freundschaftsanfrage geschickt</>
+                    : <><b>{n.from_name}</b> hat deine Anfrage angenommen! 🎉</>
+                  }
+                  <div className={s.notifTime}>{new Date(n.created_at).toLocaleDateString('de-DE')}</div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      )}
 
       {/* Incoming requests */}
       {requests.length > 0 && (
         <div className={s.section}>
-          <div className={s.sectionLabel}>Anfragen</div>
+          <div className={s.sectionLabel}>📨 Ausstehende Anfragen</div>
           {requests.map(r => (
             <div key={r.friendshipId} className={s.requestCard}>
               <Avatar name={r.name || r.username} url={r.avatar_url} />
@@ -84,7 +114,7 @@ export default function SocialPage() {
       {/* Tabs */}
       <div className={s.tabs}>
         {TABS.map(t => (
-          <button key={t} className={`${s.tab} ${tab===t?s.active:''}`} onClick={() => setTab(t)}>{t}</button>
+          <button key={t} className={`${s.tab} ${tab===t ? s.active : ''}`} onClick={() => setTab(t)}>{t}</button>
         ))}
       </div>
 
@@ -111,71 +141,65 @@ export default function SocialPage() {
       {tab === 'Leaderboard' && (
         <div className={s.section}>
           <div className={s.lbHeader}>
-            <span className={s.lbHeaderLabel} style={{ flex:1, marginLeft: 82 }}>Spieler</span>
+            <span className={s.lbHeaderLabel} style={{ flex:1, marginLeft:78 }}>Spieler</span>
             <span className={s.lbHeaderLabel} style={{ width:52, textAlign:'center' }}>Heute ✓</span>
-            <span className={s.lbHeaderLabel} style={{ width:60, textAlign:'center' }}>Level</span>
+            <span className={s.lbHeaderLabel} style={{ width:80, textAlign:'right' }}>Level</span>
           </div>
-          {leaderboard.map((entry, i) => {
-            const isMe = entry.user_id === user?.id
-            return (
-              <div key={entry.user_id}
-                className={`${s.lbRow} ${isMe ? s.lbMe : ''}`}
-                onClick={() => !isMe && nav(`/profile/${entry.username}`)}>
-                <div className={s.lbRank}>
-                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`}
+          {leaderboard.length === 0
+            ? <div className={s.empty}><p>Adde Freunde um das Leaderboard zu sehen!</p></div>
+            : leaderboard.map((entry, i) => {
+              const isMe = entry.user_id === user?.id
+              const lvl  = getLevel(entry.streak_days || 0)
+              return (
+                <div key={entry.user_id}
+                  className={`${s.lbRow} ${isMe ? s.lbMe : ''}`}
+                  onClick={() => !isMe && nav(`/profile/${entry.username}`)}>
+                  <div className={s.lbRank}>
+                    {i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : `#${i+1}`}
+                  </div>
+                  <Avatar name={entry.name || entry.username} url={entry.avatar_url} size={36} />
+                  <div className={s.cardInfo}>
+                    <div className={s.cardName}>{isMe ? 'Du' : (entry.name || entry.username)}</div>
+                    <div className={s.cardSub}>@{entry.username}</div>
+                  </div>
+                  <div className={s.lbToday}>
+                    <span className={s.lbTodayNum}>{entry.today_checks}</span>
+                    <span className={s.lbTodayTotal}>/{entry.total_habits}</span>
+                  </div>
+                  <div className={s.lbLevel}>
+                    <div className={s.lbLevelBadge}>{lvl.icon} {lvl.name}</div>
+                  </div>
                 </div>
-                <Avatar name={entry.name || entry.username} url={entry.avatar_url} size={36} />
-                <div className={s.cardInfo}>
-                  <div className={s.cardName}>{isMe ? 'Du' : (entry.name || entry.username)}</div>
-                  <div className={s.cardSub}>@{entry.username}</div>
-                </div>
-                <div className={s.lbToday}>
-                  <span className={s.lbTodayNum}>{entry.today_checks}</span>
-                  <span className={s.lbTodayTotal}>/{entry.total_habits}</span>
-                </div>
-                <div className={s.lbLevel}>
-                  {(() => {
-                    const l = getLevel(entry.streak_days || 0)
-                    return (
-                      <div className={s.lbLevelBadge}>
-                        <span>{l.icon}</span>
-                        <span>{l.name}</span>
-                      </div>
-                    )
-                  })()}
-                </div>
-              </div>
-            )
-          })}
+              )
+            })
+          }
         </div>
       )}
 
       {/* Search */}
       {tab === 'Suchen' && (
         <div className={s.section}>
-          <input className={s.searchInput} placeholder="Username suchen..."
+          <input className={s.searchInput} placeholder="Username oder Name suchen..."
             value={query} onChange={e => setQuery(e.target.value)} autoFocus />
-          {searchResults.length > 0 && query.length >= 2 && (
-            searchResults.map(u => {
-              const isMe     = u.id === user?.id
-              const isFriend = friends.some(f => f.id === u.id)
-              const wasSent  = sent[u.id]
-              return (
-                <div key={u.id} className={s.friendCard}>
-                  <Avatar name={u.name || u.username} url={u.avatar_url} />
-                  <div className={s.cardInfo} onClick={() => nav(`/profile/${u.username}`)}>
-                    <div className={s.cardName}>{u.name || u.username}</div>
-                    <div className={s.cardSub}>@{u.username}</div>
-                  </div>
-                  {!isMe && (
-                    isFriend   ? <div className={s.friendTag}>Freund ✓</div>
-                    : wasSent  ? <div className={s.sentTag}>Gesendet</div>
-                    : <button className={s.addBtn} onClick={() => handleSend(u.id, u)}>+ Adden</button>
-                  )}
+          {searchResults.map(u => {
+            const isMe     = u.id === user?.id
+            const isFriend = friends.some(f => f.id === u.id)
+            const wasSent  = sent[u.id]
+            return (
+              <div key={u.id} className={s.friendCard}>
+                <Avatar name={u.name || u.username} url={u.avatar_url} />
+                <div className={s.cardInfo} onClick={() => nav(`/profile/${u.username}`)}>
+                  <div className={s.cardName}>{u.name || u.username}</div>
+                  <div className={s.cardSub}>@{u.username}</div>
                 </div>
-              )
-            })
-          )}
+                {!isMe && (
+                  isFriend   ? <div className={s.friendTag}>Freund ✓</div>
+                  : wasSent  ? <div className={s.sentTag}>Gesendet ✓</div>
+                  : <button className={s.addBtn} onClick={() => handleSend(u.id)}>+ Adden</button>
+                )}
+              </div>
+            )
+          })}
           {query.length >= 2 && searchResults.length === 0 && (
             <div className={s.empty}><p>Kein User gefunden.</p></div>
           )}
@@ -186,15 +210,15 @@ export default function SocialPage() {
 }
 
 export function Avatar({ name, url, size = 40 }) {
-  const initials = (name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
-  const hue = [...(name||'')].reduce((a,c) => a + c.charCodeAt(0), 0) % 360
+  const initials = (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()
+  const hue = [...(name||'')].reduce((a,c) => a+c.charCodeAt(0), 0) % 360
   if (url) return <img src={url} style={{ width:size, height:size, borderRadius:'50%', objectFit:'cover', flexShrink:0 }} alt={name} />
   return (
     <div style={{
       width:size, height:size, borderRadius:'50%', flexShrink:0,
       background:`hsl(${hue},55%,38%)`,
       display:'flex', alignItems:'center', justifyContent:'center',
-      fontSize: size*0.35, fontWeight:700, color:'white',
+      fontSize:size*0.35, fontWeight:700, color:'white',
     }}>{initials}</div>
   )
 }

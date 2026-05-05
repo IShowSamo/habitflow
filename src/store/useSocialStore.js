@@ -8,7 +8,27 @@ export const useSocialStore = create((set, get) => ({
   leaderboard: [],      // leaderboard entries
   viewedProfile: null,  // { profile, habits, logs, streaks }
   searchResults: [],
+  inAppNotifs: [],
   loading: false,
+
+  // ── Fetch in-app notifications ────────────────────────────────────────────
+  fetchInAppNotifs: async (myId) => {
+    const { data } = await supabase
+      .from('in_app_notifications')
+      .select('*')
+      .eq('user_id', myId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    set({ inAppNotifs: data || [] })
+  },
+
+  markNotifsRead: async (myId) => {
+    await supabase.from('in_app_notifications')
+      .update({ read: true })
+      .eq('user_id', myId)
+      .eq('read', false)
+    set(s => ({ inAppNotifs: s.inAppNotifs.map(n => ({ ...n, read: true })) }))
+  },
 
   // ── Fetch accepted friends ─────────────────────────────────────────────────
   fetchFriends: async (myId) => {

@@ -129,36 +129,42 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Habits + streaks */}
+      {/* Habits - show icons only, no names for privacy */}
       <div className={s.card}>
-        <div className={s.cardTitle}>Habits & Streaks</div>
-        {habits.length === 0
-          ? <p style={{ color:'var(--text2)', fontSize:14 }}>Keine öffentlichen Habits.</p>
-          : habits.map((h, i) => {
+        <div className={s.cardTitle}>Aktive Habits ({habits.length})</div>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
+          {habits.map(h => {
+            const streak = streaks[h.id] || 0
             const checked = logs[todayKey]?.[h.id]
-            const streak  = streaks[h.id] || 0
             return (
-              <div key={h.id} className={s.habitRow}>
-                <div className={s.habitIcon} style={{ background: h.color + '22' }}>{h.icon}</div>
-                <div className={s.habitInfo}>
-                  <div className={s.habitName}>{h.name}</div>
-                  {streak > 0 && <div className={s.habitStreak}>🔥 {streak} Tage Streak</div>}
-                </div>
-                <div className={`${s.checkDot} ${checked ? s.checkDotDone : ''}`}>
-                  {checked && <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                    <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>}
-                </div>
+              <div key={h.id} title={streak > 0 ? `🔥 ${streak} Tage Streak` : 'Kein Streak'}
+                style={{
+                  width:48, height:48, borderRadius:12,
+                  background: h.color + '22',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  fontSize:22, position:'relative',
+                  border: checked ? '2px solid #22c55e' : '2px solid transparent',
+                }}>
+                {h.icon}
+                {streak > 0 && (
+                  <div style={{
+                    position:'absolute', bottom:-4, right:-4,
+                    background:'var(--gold)', borderRadius:'50%',
+                    width:16, height:16, fontSize:9, fontWeight:700,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    color:'#000',
+                  }}>{streak}</div>
+                )}
               </div>
             )
-          })
-        }
+          })}
+        </div>
       </div>
 
-      {/* Month completion bars */}
+      {/* Month completion - aggregate only */}
       <div className={s.card}>
-        <div className={s.cardTitle}>Erfolgsquote diesen Monat</div>
-        {habits.map((h, i) => {
+        <div className={s.cardTitle}>Monatsquote (gesamt)</div>
+        {habits.slice(0,1).map((h, i) => {
           const now = new Date()
           const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
           // Count ALL days from month start to today

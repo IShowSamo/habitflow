@@ -184,3 +184,39 @@
   text-transform: uppercase; letter-spacing: 0.6px;
 }
 .lbHeaderLabel { font-size: 10px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+
+/* Notification bell */
+.notifBtn {
+  position: relative; background: none; border: none;
+  font-size: 22px; cursor: pointer; padding: 4px;
+}
+.notifDot {
+  position: absolute; top: 0; right: 0;
+  background: var(--red); color: white;
+  font-size: 10px; font-weight: 700;
+  width: 16px; height: 16px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Notification panel */
+.notifPanel {
+  margin: 0 16px 12px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 14px; overflow: hidden;
+}
+.notifPanelTitle {
+  padding: 12px 14px 8px;
+  font-size: 12px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.notifEmpty { padding: 14px; font-size: 13px; color: var(--text3); text-align: center; }
+.notifItem {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 14px; border-bottom: 1px solid var(--border);
+}
+.notifItem:last-child { border-bottom: none; }
+.notifUnread { background: rgba(108,99,255,0.06); }
+.notifText { flex: 1; font-size: 13px; color: var(--text2); line-height: 1.4; }
+.notifText b { color: var(--text); }
+.notifTime { font-size: 11px; color: var(--text3); margin-top: 3px; }
