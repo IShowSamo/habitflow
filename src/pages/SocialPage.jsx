@@ -179,8 +179,14 @@ export default function SocialPage() {
       {/* Search */}
       {tab === 'Suchen' && (
         <div className={s.section}>
-          <input className={s.searchInput} placeholder="Username oder Name suchen..."
-            value={query} onChange={e => setQuery(e.target.value)} autoFocus />
+          <div className={s.searchWrap}>
+            <span className={s.searchIcon}>🔍</span>
+            <input className={s.searchInput} placeholder="Username oder Name suchen..."
+              value={query} onChange={e => setQuery(e.target.value)} autoFocus />
+            {query.length > 0 && (
+              <button className={s.searchClear} onClick={() => setQuery('')}>✕</button>
+            )}
+          </div>
           {searchResults.map(u => {
             const isMe     = u.id === user?.id
             const isFriend = friends.some(f => f.id === u.id)
