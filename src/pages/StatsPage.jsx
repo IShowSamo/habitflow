@@ -51,20 +51,48 @@ export default function StatsPage() {
 
   useEffect(() => {
     if (!user) return
-    loadBadges()
+    loadBadgesAndCheck()
     buildYearData()
-    // Check for new badges
-    checkAndAwardBadges(user.id, {
-      streak: bestStreak, totalChecks,
-      perfectWeek: weekDone >= 7,
-      perfectMonth: false,
-      friendCount: 0,
-    }).then(nb => { if (nb?.length) setNewBadges(nb) })
   }, [user, bestStreak, totalChecks])
 
-  const loadBadges = async () => {
-    const { data } = await supabase.from('badges').select('*').eq('user_id', user.id)
-    setBadges(data || [])
+  const loadBadgesAndCheck = async () => {
+    // Load existing badges from DB
+    const { data, error } = await supabase.from('badges').select('*').eq('user_id', user.id)
+    const existing = data || []
+    setBadges(existing)
+    const earned = new Set(existing.map(b => b.type))
+
+    // Compute which badges should be earned based on current stats
+    const shouldEarn = []
+    if (totalChecks >= 1)    shouldEarn.push('first_check')
+    if (bestStreak >= 3)     shouldEarn.push('streak_3')
+    if (bestStreak >= 7)     shouldEarn.push('streak_7')
+    if (bestStreak >= 14)    shouldEarn.push('streak_14')
+    if (bestStreak >= 30)    shouldEarn.push('streak_30')
+    if (bestStreak >= 100)   shouldEarn.push('streak_100')
+    if (totalChecks >= 100)  shouldEarn.push('century')
+    if (weekDone >= 7)       shouldEarn.push('perfect_week')
+
+    // Find newly earned
+    const newlyEarned = shouldEarn.filter(t => !earned.has(t))
+
+    if (newlyEarned.length) {
+      // Save to DB
+      try {
+        await supabase.from('badges').upsert(
+          newlyEarned.map(type => ({ user_id: user.id, type })),
+          { onConflict: 'user_id,type' }
+        )
+      } catch(e) { console.log('badges table not ready yet') }
+
+      // Update local state
+      const allBadges = [...existing, ...newlyEarned.map(type => ({ user_id: user.id, type }))]
+      setBadges(allBadges)
+
+      // Show toast for new ones
+      const defs = newlyEarned.map(t => BADGE_DEFINITIONS.find(b => b.type === t)).filter(Boolean)
+      setNewBadges(defs)
+    }
   }
 
   const buildYearData = () => {

@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
-import { postActivity, checkAndAwardBadges } from '../lib/badges'
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
 
 const today = () => format(new Date(), 'yyyy-MM-dd')
@@ -75,16 +74,30 @@ export const useStore = create((set, get) => ({
         { habit_id: habitId, log_date: date, done: true, user_id: get().user.id },
         { onConflict: 'habit_id,log_date' }
       )
-      // Check for perfect day
-      const { habits, getDoneCount, user, getStreak } = get()
+      // Check for perfect day & post to feed
+      const { habits, getDoneCount, user: u, getStreak } = get()
       const doneAfter = getDoneCount(date)
-      if (doneAfter === habits.length && habits.length > 0) {
-        postActivity(user.id, 'perfect_day', { date }).catch(() => {})
+      if (doneAfter === habits.length && habits.length > 0 && u) {
+        const today2 = new Date().toISOString().slice(0,10)
+        supabase.from('activity_feed')
+          .select('id').eq('user_id', u.id).eq('type', 'perfect_day')
+          .gte('created_at', today2).limit(1)
+          .then(({ data }) => {
+            if (!data?.length) {
+              supabase.from('activity_feed').insert({
+                user_id: u.id, type: 'perfect_day', payload: { date }
+              }).catch(() => {})
+            }
+          })
       }
-      // Check streak milestones
-      const streak = getStreak(habitId)
-      if ([7, 14, 30, 50, 100].includes(streak)) {
-        postActivity(user.id, 'streak_milestone', { streak, habitId }).catch(() => {})
+      // Streak milestone
+      if (u) {
+        const streak = getStreak(habitId)
+        if ([7, 14, 30, 50, 100].includes(streak)) {
+          supabase.from('activity_feed').insert({
+            user_id: u.id, type: 'streak_milestone', payload: { streak }
+          }).catch(() => {})
+        }
       }
     } else {
       await supabase.from('habit_logs')

@@ -15,6 +15,7 @@ function activityText(item) {
     case 'streak_milestone': return { icon:'⚡', text:`${p.streak} Tage Streak erreicht!` }
     case 'badge_earned':     return { icon: p.icon || '🏆', text:`Badge freigeschaltet: ${p.name}` }
     case 'habit_added':      return { icon: p.habit_icon || '✨', text:`Neues Habit gestartet: ${p.habit_name}` }
+    case 'manual_post':      return { icon: p.emoji || '💪', text: p.text || '' }
     default:                 return { icon:'📌', text:'Aktivität' }
   }
 }
@@ -79,6 +80,22 @@ export default function FeedPage() {
     }
   }
 
+  const [showPost, setShowPost] = useState(false)
+  const [postText, setPostText] = useState('')
+  const POST_EMOJIS = ['💪','🔥','⚡','🏆','😤','🎯','✅','🌱']
+  const [postEmoji, setPostEmoji] = useState('💪')
+
+  const submitPost = async () => {
+    if (!postText.trim()) return
+    await supabase.from('activity_feed').insert({
+      user_id: user.id,
+      type: 'manual_post',
+      payload: { text: postText, emoji: postEmoji }
+    })
+    setPostText(''); setShowPost(false)
+    loadFeed()
+  }
+
   if (loading) return (
     <div className={s.page}>
       <div className={s.header}><h1 className={s.title}>Feed</h1></div>
@@ -89,9 +106,30 @@ export default function FeedPage() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Feed</h1>
-        <p className={s.sub}>Was deine Freunde machen</p>
+        <div>
+          <h1 className={s.title}>Feed</h1>
+          <p className={s.sub}>Was deine Freunde machen</p>
+        </div>
+        <button className={s.postBtn} onClick={() => setShowPost(v => !v)}>
+          {showPost ? '✕' : '+ Post'}
+        </button>
       </div>
+
+      {showPost && (
+        <div className={s.postBox}>
+          <div className={s.postEmojiRow}>
+            {['💪','🔥','⚡','🏆','😤','🎯','✅','🌱'].map(e => (
+              <button key={e} className={`${s.postEmoji} ${postEmoji===e ? s.postEmojiSel : ''}`}
+                onClick={() => setPostEmoji(e)}>{e}</button>
+            ))}
+          </div>
+          <textarea className={s.postInput} placeholder="Was motiviert dich heute?"
+            value={postText} onChange={e => setPostText(e.target.value)} rows={2} />
+          <button className={s.postSubmit} onClick={submitPost} disabled={!postText.trim()}>
+            Posten
+          </button>
+        </div>
+      )}
 
       {feed.length === 0 ? (
         <div className={s.empty}>

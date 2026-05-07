@@ -41,3 +41,38 @@
   border-color: rgba(245,158,11,0.4);
   color: var(--gold);
 }
+
+/* Post UI */
+.header { display: flex; justify-content: space-between; align-items: flex-start; padding: 52px 20px 16px; }
+.postBtn {
+  padding: 8px 18px; border-radius: 99px;
+  background: var(--accent); border: none;
+  color: white; font-size: 13px; font-weight: 700;
+  box-shadow: 0 4px 14px rgba(108,99,255,0.35);
+  flex-shrink: 0; margin-top: 4px;
+}
+.postBox {
+  margin: 0 16px 12px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+}
+.postEmojiRow { display: flex; gap: 8px; }
+.postEmoji {
+  width: 34px; height: 34px; border-radius: 10px; font-size: 18px;
+  background: var(--surface2); border: 1.5px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+}
+.postEmojiSel { border-color: var(--accent); background: rgba(108,99,255,0.15); }
+.postInput {
+  width: 100%; padding: 10px 12px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-size: 14px; resize: none; outline: none;
+  line-height: 1.5;
+}
+.postInput:focus { border-color: var(--accent); }
+.postSubmit {
+  padding: 10px; border-radius: 10px;
+  background: var(--accent); border: none;
+  color: white; font-size: 14px; font-weight: 600;
+}
+.postSubmit:disabled { opacity: 0.4; }
