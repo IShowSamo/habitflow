@@ -1,0 +1,43 @@
+.page { padding: 0 0 24px; }
+.header { padding: 52px 20px 16px; }
+.title  { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+.sub    { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+.empty {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 60px 20px; gap: 12px; color: var(--text2); font-size: 14px; text-align: center;
+}
+.empty span { font-size: 40px; }
+
+.feedCard {
+  margin: 0 16px 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 14px 16px;
+}
+.feedHeader { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.feedMeta   { flex: 1; }
+.feedName   { font-size: 14px; font-weight: 600; }
+.feedTime   { font-size: 12px; color: var(--text2); margin-top: 1px; }
+
+.feedBody {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2); border-radius: 10px;
+  margin-bottom: 10px;
+}
+.feedActivityIcon { font-size: 20px; flex-shrink: 0; }
+.feedText { font-size: 14px; font-weight: 500; color: var(--text); }
+
+.feedFooter { display: flex; gap: 8px; }
+.reactBtn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 99px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all 0.15s;
+}
+.reactBtn.reacted {
+  background: rgba(245,158,11,0.15);
+  border-color: rgba(245,158,11,0.4);
+  color: var(--gold);
+}

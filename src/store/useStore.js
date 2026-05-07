@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import { postActivity, checkAndAwardBadges } from '../lib/badges'
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
 
 const today = () => format(new Date(), 'yyyy-MM-dd')
@@ -74,6 +75,17 @@ export const useStore = create((set, get) => ({
         { habit_id: habitId, log_date: date, done: true, user_id: get().user.id },
         { onConflict: 'habit_id,log_date' }
       )
+      // Check for perfect day
+      const { habits, getDoneCount, user, getStreak } = get()
+      const doneAfter = getDoneCount(date)
+      if (doneAfter === habits.length && habits.length > 0) {
+        postActivity(user.id, 'perfect_day', { date }).catch(() => {})
+      }
+      // Check streak milestones
+      const streak = getStreak(habitId)
+      if ([7, 14, 30, 50, 100].includes(streak)) {
+        postActivity(user.id, 'streak_milestone', { streak, habitId }).catch(() => {})
+      }
     } else {
       await supabase.from('habit_logs')
         .delete()
