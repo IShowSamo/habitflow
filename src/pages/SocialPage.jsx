@@ -31,6 +31,12 @@ export default function SocialPage() {
   const [query, setQuery]   = useState('')
   const [sent, setSent]     = useState({})
   const [showNotifs, setShowNotifs] = useState(false)
+  // Auto-open notif panel if there are pending requests
+  useEffect(() => {
+    if (requests.length > 0 || inAppNotifs.some(n => !n.read && n.type === 'friend_request')) {
+      setShowNotifs(true)
+    }
+  }, [requests.length, inAppNotifs.length])
   const nav = useNavigate()
 
   useEffect(() => {
@@ -75,18 +81,38 @@ export default function SocialPage() {
           <div className={s.notifPanelTitle}>Benachrichtigungen</div>
           {inAppNotifs.length === 0
             ? <div className={s.notifEmpty}>Keine Benachrichtigungen</div>
-            : inAppNotifs.map(n => (
-              <div key={n.id} className={`${s.notifItem} ${!n.read ? s.notifUnread : ''}`}>
-                <Avatar name={n.from_name || '?'} url={n.from_avatar} size={32} />
-                <div className={s.notifText}>
-                  {n.type === 'friend_request'
-                    ? <><b>{n.from_name}</b> hat dir eine Freundschaftsanfrage geschickt</>
-                    : <><b>{n.from_name}</b> hat deine Anfrage angenommen! 🎉</>
-                  }
-                  <div className={s.notifTime}>{new Date(n.created_at).toLocaleDateString('de-DE')}</div>
+            : inAppNotifs.map(n => {
+              // Find matching pending request for friend_request notifications
+              const pendingReq = n.type === 'friend_request'
+                ? requests.find(r => r.id === n.from_id)
+                : null
+
+              return (
+                <div key={n.id} className={`${s.notifItem} ${!n.read ? s.notifUnread : ''}`}>
+                  <Avatar name={n.from_name || '?'} url={n.from_avatar} size={36} />
+                  <div className={s.notifText}>
+                    <div>
+                      {n.type === 'friend_request'
+                        ? <><b>{n.from_name}</b> hat dir eine Freundschaftsanfrage geschickt</>
+                        : <><b>{n.from_name}</b> hat deine Anfrage angenommen! 🎉</>
+                      }
+                    </div>
+                    <div className={s.notifTime}>{new Date(n.created_at).toLocaleDateString('de-DE')}</div>
+                    {n.type === 'friend_request' && (
+                      <NotifRequestActions
+                        fromId={n.from_id}
+                        fromName={n.from_name}
+                        requests={requests}
+                        userId={user.id}
+                        acceptRequest={acceptRequest}
+                        removeConnection={removeConnection}
+                        onDone={() => fetchInAppNotifs(user.id)}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
+              )
+            })
           }
         </div>
       )}
@@ -214,6 +240,48 @@ export default function SocialPage() {
     </div>
   )
 }
+
+function NotifRequestActions({ fromId, requests, userId, acceptRequest, removeConnection, onDone }) {
+  const [done, setDone] = useState(false)
+  const [action, setAction] = useState(null)
+
+  // Find the friendship request
+  // requests items: { friendshipId, id (user profile id), username, name, avatar_url }
+  const req = requests.find(r => r.id === fromId)
+
+  if (done) return (
+    <div style={{ fontSize:12, color: action==='accept' ? 'var(--green)' : 'var(--text3)', marginTop:6 }}>
+      {action === 'accept' ? '✓ Angenommen' : '✕ Abgelehnt'}
+    </div>
+  )
+
+  if (!req) return (
+    <div style={{ fontSize:11, color:'var(--text3)', marginTop:4 }}>
+      Bereits bearbeitet
+    </div>
+  )
+
+  return (
+    <div style={{ display:'flex', gap:8, marginTop:8 }}>
+      <button
+        onClick={async (e) => { e.stopPropagation(); await acceptRequest(req.friendshipId, userId); setAction('accept'); setDone(true); onDone() }}
+        style={{
+          padding:'6px 14px', borderRadius:99, border:'none',
+          background:'rgba(34,197,94,0.15)', color:'var(--green)',
+          fontSize:12, fontWeight:600, cursor:'pointer'
+        }}>✓ Annehmen</button>
+      <button
+        onClick={async (e) => { e.stopPropagation(); await removeConnection(req.friendshipId, userId); setAction('decline'); setDone(true); onDone() }}
+        style={{
+          padding:'6px 14px', borderRadius:99,
+          border:'1px solid var(--border2)',
+          background:'transparent', color:'var(--text2)',
+          fontSize:12, fontWeight:600, cursor:'pointer'
+        }}>✕ Ablehnen</button>
+    </div>
+  )
+}
+
 
 export function Avatar({ name, url, size = 40 }) {
   const initials = (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()
