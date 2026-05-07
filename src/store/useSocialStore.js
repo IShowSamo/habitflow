@@ -89,6 +89,8 @@ export const useSocialStore = create((set, get) => ({
     await supabase.from('friendships').update({ status: 'accepted' }).eq('id', friendshipId)
     await get().fetchRequests(myId)
     await get().fetchFriends(myId)
+    // Refresh leaderboard so new friend appears
+    await get().fetchLeaderboard()
   },
 
   // ── Decline / remove ──────────────────────────────────────────────────────

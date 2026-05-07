@@ -52,12 +52,18 @@ export default function SocialPage() {
     return () => clearTimeout(t)
   }, [query])
 
+  const handleAcceptAndRefresh = async (friendshipId) => {
+    await acceptRequest(friendshipId, user.id)
+    // Refresh leaderboard to show new friend
+    setTimeout(() => fetchLeaderboard(), 1000)
+  }
+
   const handleSend = async (toId) => {
     setSent(s => ({ ...s, [toId]: true }))
     await sendRequest(user.id, toId)
   }
 
-  const unreadCount = inAppNotifs.filter(n => !n.read).length
+  const unreadCount = inAppNotifs.filter(n => !n.read).length + requests.length
   const pendingSent = [] // could track sent requests
 
   return (
@@ -67,8 +73,10 @@ export default function SocialPage() {
       <div className={s.header}>
         <h1 className={s.title}>Community</h1>
         <button className={s.notifBtn} onClick={() => {
+          const opening = !showNotifs
           setShowNotifs(v => !v)
-          if (!showNotifs && unreadCount > 0) markNotifsRead(user.id)
+          // Mark read when closing, not opening
+          if (!opening && unreadCount > 0) markNotifsRead(user.id)
         }}>
           🔔
           {unreadCount > 0 && <span className={s.notifDot}>{unreadCount}</span>}
@@ -104,9 +112,9 @@ export default function SocialPage() {
                         fromName={n.from_name}
                         requests={requests}
                         userId={user.id}
-                        acceptRequest={acceptRequest}
+                        acceptRequest={handleAcceptAndRefresh}
                         removeConnection={removeConnection}
-                        onDone={() => fetchInAppNotifs(user.id)}
+                        onDone={() => { fetchInAppNotifs(user.id); fetchFriends(user.id) }}
                       />
                     )}
                   </div>
@@ -129,7 +137,7 @@ export default function SocialPage() {
                 <div className={s.cardSub}>@{r.username}</div>
               </div>
               <div className={s.requestBtns}>
-                <button className={s.acceptBtn} onClick={() => acceptRequest(r.friendshipId, user.id)}>✓</button>
+                <button className={s.acceptBtn} onClick={() => { acceptRequest(r.friendshipId, user.id); setTimeout(() => fetchLeaderboard(), 1000) }}>✓</button>
                 <button className={s.declineBtn} onClick={() => removeConnection(r.friendshipId, user.id)}>✕</button>
               </div>
             </div>
@@ -264,7 +272,7 @@ function NotifRequestActions({ fromId, requests, userId, acceptRequest, removeCo
   return (
     <div style={{ display:'flex', gap:8, marginTop:8 }}>
       <button
-        onClick={async (e) => { e.stopPropagation(); await acceptRequest(req.friendshipId, userId); setAction('accept'); setDone(true); onDone() }}
+        onClick={async (e) => { e.stopPropagation(); await acceptRequest(req.friendshipId, userId); setAction('accept'); setDone(true); onDone(); }}
         style={{
           padding:'6px 14px', borderRadius:99, border:'none',
           background:'rgba(34,197,94,0.15)', color:'var(--green)',
